@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+<!--        <TrimMode>link</TrimMode>-->
+<!--        <PublishTrimmed>true</PublishTrimmed>-->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <KnownFrameworkReference Update="Microsoft.AspNetCore.App" IsTrimmable="true" />
+    </ItemGroup>
+
+    <Target Name="SkipLinkingAssemblies" BeforeTargets="PrepareForILLink">
+        <ItemGroup>
+            <ManagedAssemblyToLink Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.AspNetCore.DataProtection'))" IsTrimmable="false" TrimMode="copyused" />
+        </ItemGroup>
+    </Target>
+</Project>

@@ -45,7 +45,7 @@ CREATE TABLE dbo.TemplateFields
     Id UNIQUEIDENTIFIER PRIMARY KEY default NEWID(),
     Name VARCHAR(50),
     TemplateId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Templates(ID),
-    Tenant NUMERIC NULL,
+    TenantId NUMERIC NULL,
     Deleted BIT
 )
 GO
