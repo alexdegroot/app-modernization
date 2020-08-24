@@ -12,7 +12,7 @@ services:
     build: ./EavDb/
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=eavdb
+      - SA_PASSWORD=verySecure(!)Password
     ports:
       - '1433:1433'
   rodb:
@@ -27,14 +27,3 @@ services:
     image: 'mcr.microsoft.com/azure-storage/azurite'
     ports:
       - '10000-10001:10000-10001'
-  mutationqueue:
-    image: rabbitmq:3
-    ports:
-      - '5000-5672'
-  mutationqueuemgmt:
-    image: rabbitmq:3-management
-    environment:
-      - RABBITMQ_DEFAULT_USER=user 
-      - RABBITMQ_DEFAULT_PASS=password
-    ports:
-      - '7000-15672'
