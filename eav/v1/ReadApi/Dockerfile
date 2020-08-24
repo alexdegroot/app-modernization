@@ -11,9 +11,9 @@ RUN dotnet restore $ProjectFile
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out -r linux-musl-x64 $ProjectFile
+RUN dotnet publish -c Release -o out -r linux-musl-x64  --self-contained true $ProjectFile
 
-# Build runtime image
+# Get runtime image
 FROM alpine:3
 
 # Install dependencies
@@ -22,12 +22,11 @@ RUN apk add --no-cache libstdc++ libintl
 EXPOSE 80
 EXPOSE 443
 
-# Copy 
+# Copy files from buildenv
 WORKDIR /app
 COPY --from=build-env /app/out .
 
+# Disable globalization to avoud having to install 'icu'
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
-ENV STARTUP="./$Project"
-#RUN chmod +x $STARTUP
 ENTRYPOINT ./ReadApi --urls http://0.0.0.0:80
