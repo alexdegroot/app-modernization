@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ReadApi
+namespace WriteApi
 {
     public class Startup
     {
@@ -26,7 +26,7 @@ namespace ReadApi
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World from Read API!!!"); });
+                endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World from Write API!!!"); });
             });
         }
     }
