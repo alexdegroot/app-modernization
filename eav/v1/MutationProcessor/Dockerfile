@@ -1,4 +1,4 @@
-ARG Project=WriteApi
+ARG Project=MutationProcessor
 
 # Get smallest SDK image
 FROM mcr.microsoft.com/dotnet/core/sdk:5.0-alpine AS build-env
@@ -30,12 +30,8 @@ RUN apk add --no-cache libstdc++ libintl
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-# Webserver ports
-EXPOSE 80
-EXPOSE 443
-
 # Disable globalization to avoud having to install 'icu'
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 # Start application
-ENTRYPOINT "./${APPTORUN}" --urls http://0.0.0.0:80
+ENTRYPOINT "./${APPTORUN}"

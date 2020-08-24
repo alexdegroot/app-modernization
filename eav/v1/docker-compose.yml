@@ -1,15 +1,21 @@
 version: '3'
 services:
   readapi:
-    build: ./ReadApi/
+    build:
+      context: ./ReadApi
+      dockerfile: ./Dockerfile
     ports:
       - '2000:80'
   writeapi:
-    build: ./WriteApi/
+    build: 
+      context: ./WriteApi
+      dockerfile: ./Dockerfile
     ports:
       - '3000:80'
   eavdb:
-    build: ./EavDb/
+    build:
+      context: ./EavDb
+      dockerfile: ./Dockerfile
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=verySecure(!)Password
@@ -27,3 +33,11 @@ services:
     image: 'mcr.microsoft.com/azure-storage/azurite'
     ports:
       - '10000-10001:10000-10001'
+  mutationextractor:
+    build:
+      context: ./MutationExtractor
+      dockerfile: ./Dockerfile
+  mutationprocessor:
+    build:
+      context: ./MutationProcessor
+      dockerfile: ./Dockerfile      
