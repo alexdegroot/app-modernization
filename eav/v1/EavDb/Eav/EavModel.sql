@@ -24,39 +24,61 @@ IF OBJECT_ID('dbo.Templates', 'U') IS NOT NULL
     
 GO
 
+-- Contains entity types, e.g. Company, Employee.
 CREATE TABLE dbo.Templates
 (
-    Id   UNIQUEIDENTIFIER PRIMARY KEY default NEWID(),
-    Name VARCHAR(50),
-    Deleted BIT
+    Id INT PRIMARY KEY,
+    Name VARCHAR(50)
 )
 GO
 
-CREATE TABLE dbo.Entities 
+-- Contains Entity instances, e.g. specific companies or employees.
+CREATE TABLE dbo.Entities
 (
-    Id UNIQUEIDENTIFIER PRIMARY KEY default NEWID(),
-    TemplateId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Templates(ID),
-    TenantId NUMERIC,
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Description VARCHAR(100),
+    TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
+    TenantId INT,
     Deleted BIT
 )
 
-CREATE TABLE dbo.TemplateFields 
+-- Contains data elements for which values can be stored in the Mutations table.
+CREATE TABLE dbo.DataElements 
 (
-    Id UNIQUEIDENTIFIER PRIMARY KEY default NEWID(),
+    Id INT IDENTITY(1,1) PRIMARY KEY,
     Name VARCHAR(50),
-    TemplateId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Templates(ID),
-    TenantId NUMERIC NULL,
+    TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
+    TenantId INT NULL,
     Deleted BIT
 )
+
+-- Defines which data elements are allowed for certain templates / entity types.
+CREATE TABLE dbo.TemplateFields
+(
+    TemplateId INT,
+    DataElementId INT FOREIGN KEY REFERENCES DataElements(ID)
+)
 GO
-        
+
+-- Contains data element changes in time (valid from start to end dates).
 CREATE TABLE dbo.Mutations 
 (
-    Id UNIQUEIDENTIFIER PRIMARY KEY default NEWID(),
-    EntityId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Entities(ID),
-    Value VARCHAR(4000) NULL,
-    [Start] datetime2,
-    [End] datetime2,
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    EntityId INT FOREIGN KEY REFERENCES Entities(ID),
+    FieldValue VARCHAR(100) NOT NULL,
+    StartDate DATETIME,
+    EndDate DATETIME,
     Deleted BIT
 )
+GO
+
+INSERT INTO dbo.Templates
+(
+    Id, Name
+)
+VALUES
+    (15, 'Client'),
+    (17, 'Company'),
+    (21, 'Employee'),
+    (49, 'Contract')
 GO
