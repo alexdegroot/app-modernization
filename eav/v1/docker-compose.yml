@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   readapi:
     build:
@@ -6,12 +6,16 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - '2000:80'
+    depends_on:
+      - rodb
   writeapi:
     build: 
       context: ./WriteApi
       dockerfile: ./Dockerfile
     ports:
       - '3000:80'
+    depends_on:
+      - eavdb
   eavdb:
     build:
       context: ./EavDb
@@ -37,7 +41,13 @@ services:
     build:
       context: ./MutationExtractor
       dockerfile: ./Dockerfile
+    depends_on:
+      - eavdb
+      - mutationstore
   mutationprocessor:
     build:
       context: ./MutationProcessor
-      dockerfile: ./Dockerfile      
+      dockerfile: ./Dockerfile
+    depends_on:
+      - mutationstore
+      - rodb
