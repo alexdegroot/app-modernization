@@ -14,17 +14,20 @@ RUN dotnet restore $ProjectFile
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out -r linux-musl-x64  --self-contained true $ProjectFile
+RUN dotnet publish -c Release -o out -r linux-x64  --self-contained true $ProjectFile
 
 #  runtime image
-FROM alpine:3
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-focal
 
 # Application to run
 ARG Project
 ENV APPTORUN=${Project}
 
 # Install dependencies
-RUN apk add --no-cache libstdc++ libintl
+#RUN apk add --no-cache libstdc++ libintl icu
+
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
 
 # Copy files from buildenv
 WORKDIR /app
@@ -35,7 +38,7 @@ EXPOSE 80
 EXPOSE 443
 
 # Disable globalization to avoud having to install 'icu'
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=0
 
 # Start application
 ENTRYPOINT "./${APPTORUN}" --urls http://0.0.0.0:80

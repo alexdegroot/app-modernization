@@ -1,0 +1,20 @@
+# @name createEmployee
+PUT http://localhost:3000/employees
+Content-Type: application/json
+
+{
+  "FirstName":"John", 
+  "LastName":"Doo" 
+}
+
+###
+@employeeId = {{createEmployee.response.body.$.id}}
+
+# @name updateEmployee
+POST http://localhost:3000/employees/{{employeeId}}
+Content-Type: application/json
+
+{
+  "FirstName":"Johhny",
+  "LastName":"Depp"
+}
