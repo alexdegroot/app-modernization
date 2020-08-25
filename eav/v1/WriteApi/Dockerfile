@@ -37,7 +37,7 @@ COPY --from=build-env /app/out .
 EXPOSE 80
 EXPOSE 443
 
-# Disable globalization to avoud having to install 'icu'
+# Enable globalization (which also requires icu)
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=0
 
 # Start application
