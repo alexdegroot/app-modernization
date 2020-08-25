@@ -13,7 +13,7 @@ services:
       context: ./WriteApi
       dockerfile: ./Dockerfile
     environment:
-      - SQL_CONNECTIONSTRING=Server=host.docker.internal:1433;Database=EavDb;User Id=sa;Password=verySecure(!)Password;
+      - SQL_CONNECTIONSTRING=Server=host.docker.internal,1433;Database=EavDb;User Id=sa;Password=verySecure(!)Password;
     ports:
       - '3000:80'
     depends_on:

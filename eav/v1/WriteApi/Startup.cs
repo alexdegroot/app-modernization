@@ -15,8 +15,8 @@ namespace WriteApi
 
         public Startup()
         {
-            var connection = new SqlConnection(Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING"));
-            repository = new EmployeeRepository(connection);
+            var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING");
+            repository = new EmployeeRepository(connectionString);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,7 +54,7 @@ namespace WriteApi
             
             var employeeId = Convert.ToInt32(context.Request.RouteValues["employeeId"]);
 
-            repository.Update(employeeId, employee);
+            await repository.Update(employeeId, employee);
             
             context.Response.StatusCode = StatusCodes.Status202Accepted;
             await context.Response.WriteAsync($"Hello {employeeId}!");
@@ -76,7 +76,7 @@ namespace WriteApi
                 return;
             }
 
-            var id = repository.Add(employee);
+            var id = await repository.Add(employee);
 
             context.Response.StatusCode = StatusCodes.Status201Created;
             await context.Response.WriteAsJsonAsync(new {Id = id});

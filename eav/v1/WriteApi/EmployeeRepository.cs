@@ -1,25 +1,36 @@
-using System.Data;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace WriteApi
 {
     public class EmployeeRepository
     {
-        private IDbConnection _connection;
+        private readonly string _connectionString;
 
-        public EmployeeRepository(IDbConnection connection)
+        public EmployeeRepository(string connectionString)
         {
-            _connection = connection;
+            _connectionString = connectionString;
         }
 
-        public void Update(in int employeeId, Employee employee)
+        public async Task Update(int employeeId, Employee employee)
         {
-            throw new System.NotImplementedException();
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var c = connection.CreateCommand();
+            c.CommandText = "SELECT 1";
+            await c.ExecuteNonQueryAsync();
         }
 
-        public int Add(Employee employee)
+        public async Task<int> Add(Employee employee)
         {
-            _connection.Open();
-            return -1;
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var c = connection.CreateCommand();
+            c.CommandText = "SELECT 1";
+            return await c.ExecuteNonQueryAsync();
         }
+
     }
 }

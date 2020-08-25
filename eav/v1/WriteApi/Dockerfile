@@ -14,20 +14,20 @@ RUN dotnet restore $ProjectFile
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out -r linux-x64  --self-contained true $ProjectFile
+RUN dotnet publish -c Release -o out -r linux-musl-x64  --self-contained true $ProjectFile
 
 #  runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-focal
+FROM alpine:3
 
 # Application to run
 ARG Project
 ENV APPTORUN=${Project}
 
 # Install dependencies
-#RUN apk add --no-cache libstdc++ libintl icu
+RUN apk add --no-cache libstdc++ libintl icu
 
+# Move TLS back one level to ensure that SQL Server likes it
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
 
 # Copy files from buildenv
 WORKDIR /app
