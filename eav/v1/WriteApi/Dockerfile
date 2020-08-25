@@ -24,7 +24,10 @@ ARG Project
 ENV APPTORUN=${Project}
 
 # Install dependencies
-RUN apk add --no-cache libstdc++ libintl
+RUN apk add --no-cache libstdc++ libintl icu
+
+# Move TLS back one level to ensure that SQL Server likes it
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
 
 # Copy files from buildenv
 WORKDIR /app
@@ -34,8 +37,8 @@ COPY --from=build-env /app/out .
 EXPOSE 80
 EXPOSE 443
 
-# Disable globalization to avoud having to install 'icu'
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+# Enable globalization (which also requires icu)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=0
 
 # Start application
 ENTRYPOINT "./${APPTORUN}" --urls http://0.0.0.0:80
