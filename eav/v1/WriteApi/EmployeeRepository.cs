@@ -2,18 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace WriteApi
 {
-
     public class EmployeeRepository
     {
         private readonly string _connectionString;
+        private readonly ILogger<EmployeeRepository> _logger;
 
-        public EmployeeRepository(string connectionString)
+        public EmployeeRepository(ILogger<EmployeeRepository> logger)
         {
+            var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING");
             _connectionString = connectionString
                                 ?? throw new ArgumentNullException(nameof(connectionString));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Update(int employeeId, Employee employee)
@@ -30,9 +33,9 @@ namespace WriteApi
             var endDate = DateTime.MaxValue;
 
             // TODO: Following commands should only be run when the employee data element values have actually changed.
-            SetMutationDeleted(startDate, employeeId, DataElement.LastName);
-            SetMutationDeleted(startDate, employeeId, DataElement.FirstNames);
-            InsertMutations(new List<Mutation>
+            await SetMutationDeleted(startDate, employeeId, DataElement.LastName);
+            await SetMutationDeleted(startDate, employeeId, DataElement.FirstNames);
+            await InsertMutations(new List<Mutation>
             {
                 new Mutation
                 {
@@ -96,7 +99,7 @@ namespace WriteApi
                 return newEmployeeId;
             }
 
-            InsertMutations(new List<Mutation>
+            await InsertMutations(new List<Mutation>
             {
                 new Mutation
                 {
@@ -120,7 +123,7 @@ namespace WriteApi
             return newEmployeeId;
         }
 
-        private async void SetMutationDeleted(DateTime referenceDate,
+        private async Task SetMutationDeleted(DateTime referenceDate,
             int entityId, int dataElementId)
         {
             await using var connection = new SqlConnection(_connectionString);
@@ -134,7 +137,7 @@ namespace WriteApi
             await setMutationDeletedCommand.ExecuteNonQueryAsync();
         }
 
-        private async void InsertMutations(IEnumerable<Mutation> mutations)
+        private async Task InsertMutations(IEnumerable<Mutation> mutations)
         {
             var sql = string.Empty;
             // ReSharper disable once LoopCanBeConvertedToQuery

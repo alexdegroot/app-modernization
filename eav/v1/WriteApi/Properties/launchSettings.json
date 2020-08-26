@@ -12,7 +12,8 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SQL_CONNECTIONSTRING": "Server=127.0.0.1,1433;Database=EavDb;User Id=sa;Password=verySecure(!)Password;"
       }
     },
     "ReadApi": {
