@@ -39,6 +39,8 @@ services:
     image: 'mcr.microsoft.com/azure-storage/azurite'
     ports:
       - '10000-10001:10000-10001'
+    environment:
+      - AZURITE_ACCOUNTS=eavtonosql:Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
   mutationextractor:
     build:
       context: ./MutationExtractor
@@ -46,6 +48,11 @@ services:
     depends_on:
       - eavdb
       - mutationstore
+    environment:
+      - SQL_CONNECTIONSTRING=Server=host.docker.internal,1433;Database=EavDb;User Id=sa;Password=verySecure(!)Password;
+      # Notice: I'm using 127.0.0.1 here due to a weird behavior inside the client for Azure Queue. This is fixed on runtime (ContainerQueueClient) 
+      - QUEUE_CONNECTIONSTRING=DefaultEndpointsProtocol=http;AccountName=eavtonosql;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/eavtonosql;QueueEndpoint=http://127.0.0.1:10001/eavtonosql;
+      - QUEUE_NAME=changes
   mutationprocessor:
     build:
       context: ./MutationProcessor
@@ -53,3 +60,6 @@ services:
     depends_on:
       - mutationstore
       - rodb
+    environment:
+      - QUEUE_CONNECTIONSTRING=DefaultEndpointsProtocol=http;AccountName=eavtonosql;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/eavtonosql;QueueEndpoint=http://127.0.0.1:10001/eavtonosql;
+      - QUEUE_NAME=changes
