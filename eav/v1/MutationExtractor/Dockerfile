@@ -24,14 +24,16 @@ ARG Project
 ENV APPTORUN=${Project}
 
 # Install dependencies
-RUN apk add --no-cache libstdc++ libintl
+RUN apk add --no-cache libstdc++ libintl icu
 
 # Copy files from buildenv
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-# Disable globalization to avoud having to install 'icu'
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+# Enable globalization (which also requires icu)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=0
+# Ensure that the code knows it runs in a container
+ENV DOTNET_RUNNING_IN_CONTAINER=1
 
 # Start application
 ENTRYPOINT "./${APPTORUN}"
