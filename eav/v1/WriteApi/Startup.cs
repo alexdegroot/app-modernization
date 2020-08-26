@@ -4,21 +4,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Json;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Hosting;
 
 namespace WriteApi
 {
+    using Microsoft.Extensions.DependencyInjection;
+
     public class Startup
     {
-        private EmployeeRepository repository;
-
-        public Startup()
-        {
-            var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING");
-            repository = new EmployeeRepository(connectionString);
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -31,12 +24,13 @@ namespace WriteApi
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapPut("/employees", CreateEmployee);
-                endpoints.MapPost("/employees/{employeeId:int:min(1):required}", UpdateEmployee);
+                var repo = endpoints.ServiceProvider.GetRequiredService<EmployeeRepository>();
+                endpoints.MapPut("/employees", x => CreateEmployee(x, repo));
+                endpoints.MapPost("/employees/{employeeId:int:min(1):required}", x => UpdateEmployee(x, repo));
             });
         }
 
-        private async Task UpdateEmployee(HttpContext context)
+        private async Task UpdateEmployee(HttpContext context, EmployeeRepository employeeRepository)
         {
             if (!context.Request.HasJsonContentType())
             {
@@ -54,13 +48,13 @@ namespace WriteApi
             
             var employeeId = Convert.ToInt32(context.Request.RouteValues["employeeId"]);
 
-            await repository.Update(employeeId, employee);
+            await employeeRepository.Update(employeeId, employee);
             
             context.Response.StatusCode = StatusCodes.Status202Accepted;
             await context.Response.WriteAsync($"Hello {employeeId}!");
         }
 
-        private async Task CreateEmployee(HttpContext context)
+        private async Task CreateEmployee(HttpContext context, EmployeeRepository employeeRepository)
         {
             if (!context.Request.HasJsonContentType())
             {
@@ -76,7 +70,7 @@ namespace WriteApi
                 return;
             }
 
-            var id = await repository.Add(employee);
+            var id = await employeeRepository.Add(employee);
 
             context.Response.StatusCode = StatusCodes.Status201Created;
             await context.Response.WriteAsJsonAsync(new {Id = id});

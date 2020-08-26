@@ -36,20 +36,20 @@ GO
 CREATE TABLE dbo.Entities
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Description VARCHAR(100),
+    ParentId INT NULL,
+    Description VARCHAR(100) NULL,
     TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
-    TenantId INT,
-    Deleted BIT
+    TenantId INT NULL,
+    Deleted BIT NULL
 )
 
 -- Contains data elements for which values can be stored in the Mutations table.
 CREATE TABLE dbo.DataElements 
 (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Name VARCHAR(50),
-    TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
+    Id INT PRIMARY KEY,
+    Description VARCHAR(100),
     TenantId INT NULL,
-    Deleted BIT
+    Deleted BIT NULL
 )
 
 -- Defines which data elements are allowed for certain templates / entity types.
@@ -65,10 +65,11 @@ CREATE TABLE dbo.Mutations
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     EntityId INT FOREIGN KEY REFERENCES Entities(ID),
-    FieldValue VARCHAR(100) NOT NULL,
+    DataElementId INT FOREIGN KEY REFERENCES DataElements(ID),
+    FieldValue VARCHAR(100) NULL,
     StartDate DATETIME,
     EndDate DATETIME,
-    Deleted BIT
+    Deleted BIT NULL
 )
 GO
 
@@ -82,3 +83,11 @@ VALUES
     (21, 'Employee'),
     (49, 'Contract')
 GO
+
+INSERT INTO dbo.DataElements
+(
+    Id, Description
+)
+VALUES
+    (24, 'Last Name'),
+    (51, 'First Names')
