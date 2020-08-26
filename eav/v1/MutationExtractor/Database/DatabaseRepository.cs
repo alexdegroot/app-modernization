@@ -17,7 +17,7 @@ namespace MutationExtractor.Database
         public DatabaseRepository(IOptions<Configuration> config, ILogger<DatabaseRepository> logger)
         {
             _logger = logger;
-            _connectionString = config.Value.Sql_Connectionstring ?? throw new ArgumentException(nameof(config.Value.Queue_Name));
+            _connectionString = config.Value.Sql_Connectionstring ?? throw new ArgumentException(nameof(config.Value.Sql_Connectionstring));
         }
 
         public async Task<bool> Verify(CancellationToken cancellationToken)
