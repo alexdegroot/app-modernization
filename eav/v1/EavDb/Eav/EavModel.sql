@@ -73,6 +73,7 @@ CREATE TABLE dbo.Mutations
 )
 GO
 
+-- Insert entity types.
 INSERT INTO dbo.Templates
 (
     Id, Name
@@ -84,10 +85,40 @@ VALUES
     (49, 'Contract')
 GO
 
+-- Define a basic set of data elements.
 INSERT INTO dbo.DataElements
 (
     Id, Description
 )
 VALUES
     (24, 'Last Name'),
-    (51, 'First Names')
+    (25, 'Initials'),
+    (26, 'Last Name At Birth Prefix'),
+    (27, 'Partner Name'),
+    (35, 'BirthDate'),
+    (36, 'Gender'),
+    (38, 'Employment Indicator'),
+    (39, 'Hire Date'),  -- Datum indienst
+    (51, 'First Names'),
+    (94, 'Prefix Titles'),  -- E.g. Drs
+    (95, 'Suffix Titles'),  -- E.g. MA
+    (165, 'First Name To Use'),  -- Roepnaam
+    (166, 'Partner Name Prefix'),
+    (308, 'First Hire Date'),  -- Eerste datum indienst
+    (7014, 'UPI'),
+    (7213, 'Private Email Address'),
+    (10520479, 'DischargeDate')  -- Geplande laatste datum indienst
+GO
+
+-- Insert a test client and some companies below it.
+INSERT INTO dbo.Entities
+(
+    ParentId, Description, TemplateId
+)
+VALUES
+    (NULL, 'Metatech Nederland', 15),
+    (1, 'Metatech Administratie BV', 17),
+    (1, 'Metatech Constructie', 17),
+    (1, 'Metatech Horeca Services', 17),
+    (1, 'Metatech Wonen', 17)
+GO
