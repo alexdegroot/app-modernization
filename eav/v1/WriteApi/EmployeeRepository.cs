@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace WriteApi
 {
+    using System.Data;
+
     public class EmployeeRepository
     {
         private readonly string _connectionString;
@@ -13,9 +15,11 @@ namespace WriteApi
 
         public EmployeeRepository(ILogger<EmployeeRepository> logger)
         {
-            var connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING");
-            _connectionString = connectionString
-                                ?? throw new ArgumentNullException(nameof(connectionString));
+            _connectionString = Environment.GetEnvironmentVariable("SQL_CONNECTIONSTRING");
+            if (string.IsNullOrWhiteSpace(_connectionString))
+            {
+                throw new ArgumentNullException(nameof(_connectionString));
+            }
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -85,10 +89,15 @@ namespace WriteApi
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var insertEntityCommand = connection.CreateCommand();
-            insertEntityCommand.CommandText = @$"INSERT INTO dbo.Entities (Description, TemplateId)
-                VALUES ('{fullName}', {templateId}); SELECT @@IDENTITY";
-            var idObject = await insertEntityCommand.ExecuteScalarAsync();
+            const string sql = @"INSERT INTO dbo.Entities (Description, TemplateId)
+                VALUES (@FullName, @TemplateId); SELECT @@IDENTITY";
+
+            var cmd = new SqlCommand(sql);
+            AddCommandParameter(cmd, "@FullName", fullName, SqlDbType.VarChar);
+            AddCommandParameter(cmd, "@TemplateId", templateId, SqlDbType.Int);
+            cmd.Connection = connection;
+
+            var idObject = await cmd.ExecuteScalarAsync();
             if (idObject != DBNull.Value)
             {
                 newEmployeeId = Convert.ToInt32(idObject);
@@ -129,32 +138,49 @@ namespace WriteApi
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var setMutationDeletedCommand = connection.CreateCommand();
-            setMutationDeletedCommand.CommandText = @$"
-                UPDATE dbo.Mutations SET Deleted = 1, EndDate = '{referenceDate}'
-                    WHERE EntityId = {entityId} AND DataElementId = {dataElementId}
-                    AND '{referenceDate}' BETWEEN StartDate and EndDate";
-            await setMutationDeletedCommand.ExecuteNonQueryAsync();
+            const string sql = @"
+                UPDATE dbo.Mutations SET Deleted = 1, EndDate = @ReferenceDate
+                    WHERE EntityId = @EntityId AND DataElementId = @DataElementId
+                    AND @ReferenceDate BETWEEN StartDate and EndDate";
+
+            var cmd = new SqlCommand(sql);
+            AddCommandParameter(cmd, "@ReferenceDate", referenceDate, SqlDbType.DateTime);
+            AddCommandParameter(cmd, "@EntityId", entityId, SqlDbType.Int);
+            AddCommandParameter(cmd, "@DataElementId", dataElementId, SqlDbType.Int);
+            cmd.Connection = connection;
+
+            await cmd.ExecuteNonQueryAsync();
         }
 
         private async Task InsertMutations(IEnumerable<Mutation> mutations)
         {
-            var sql = string.Empty;
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var mutation in mutations)
-            {
-                sql += $@"
-                    INSERT INTO dbo.Mutations (EntityId, DataElementId, FieldValue, StartDate, EndDate)
-                        VALUES ({mutation.EntityId}, {mutation.DataElementId}, '{mutation.FieldValue}',
-                                    '{mutation.StartDate}', '{mutation.EndDate}');";
-            }
-
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var insertMutationsCommand = connection.CreateCommand();
-            insertMutationsCommand.CommandText = sql;
-            await insertMutationsCommand.ExecuteNonQueryAsync();
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var mutation in mutations)
+            {
+                const string sql = @"
+                    INSERT INTO dbo.Mutations (EntityId, DataElementId, FieldValue, StartDate, EndDate)
+                        VALUES (@EntityId, @DataElementId, @FieldValue, @StartDate, @EndDate);";
+
+                var cmd = new SqlCommand(sql);
+                AddCommandParameter(cmd, "@EntityId", mutation.EntityId, SqlDbType.Int);
+                AddCommandParameter(cmd, "@DataElementId", mutation.DataElementId, SqlDbType.Int);
+                AddCommandParameter(cmd, "@FieldValue", mutation.FieldValue, SqlDbType.VarChar);
+                AddCommandParameter(cmd, "@StartDate", mutation.StartDate, SqlDbType.DateTime);
+                AddCommandParameter(cmd, "@EndDate", mutation.EndDate, SqlDbType.DateTime);
+                cmd.Connection = connection;
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        private static void AddCommandParameter(SqlCommand command, string paramName,
+            object paramValue, SqlDbType paramType)
+        {
+            var parameter = command.Parameters.Add(paramName, paramType);
+            parameter.Value = paramValue;
         }
     }
 }
