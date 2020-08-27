@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using WriteApi.Mapping;
 
 namespace WriteApi
 {
-    using System.Data;
-
     public class EmployeeRepository
     {
         private readonly string _connectionString;
         private readonly ILogger<EmployeeRepository> _logger;
+        private readonly IDataElementMapper<Employee> _dataElementMapper;
 
         public EmployeeRepository(ILogger<EmployeeRepository> logger)
         {
@@ -21,6 +22,8 @@ namespace WriteApi
                 throw new ArgumentNullException(nameof(_connectionString));
             }
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _dataElementMapper = new FluentDataElementMapper<Employee>(
+                new EmployeeMappingConfiguration());
         }
 
         public async Task Update(int employeeId, Employee employee)
@@ -30,21 +33,21 @@ namespace WriteApi
                 throw new ArgumentException("Invalid Employee ID", nameof(employeeId));
             }
 
-            var firstName = employee.FirstName;
+            var firstName = employee.FirstNames;
             var lastName = employee.LastName;
 
             var startDate = DateTime.Now.Date;
             var endDate = DateTime.MaxValue;
 
             // TODO: Following commands should only be run when the employee data element values have actually changed.
-            await SetMutationDeleted(startDate, employeeId, DataElement.LastName);
-            await SetMutationDeleted(startDate, employeeId, DataElement.FirstNames);
+            await SetMutationDeleted(startDate, employeeId, EavAttributes.LastName);
+            await SetMutationDeleted(startDate, employeeId, EavAttributes.FirstNames);
             await InsertMutations(new List<Mutation>
             {
                 new Mutation
                 {
                     EntityId = employeeId,
-                    DataElementId = DataElement.LastName,
+                    DataElementId = EavAttributes.LastName,
                     FieldValue = lastName,
                     StartDate = startDate,
                     EndDate = endDate,
@@ -53,7 +56,7 @@ namespace WriteApi
                 new Mutation
                 {
                     EntityId = employeeId,
-                    DataElementId = DataElement.FirstNames,
+                    DataElementId = EavAttributes.FirstNames,
                     FieldValue = firstName,
                     StartDate = startDate,
                     EndDate = endDate,
@@ -63,14 +66,14 @@ namespace WriteApi
 
         public async Task<int> Add(Employee employee)
         {
-            var firstName = employee.FirstName;
+            var firstName = employee.FirstNames;
             var lastName = employee.LastName;
 
             // Perform some basic validations. Validation errors should probably be handled
             // in an alternative way.
             if (string.IsNullOrWhiteSpace(firstName))
             {
-                throw new ArgumentException("Invalid First Name", nameof(employee.FirstName));
+                throw new ArgumentException("Invalid First Name", nameof(employee.FirstNames));
             }
 
             if (string.IsNullOrWhiteSpace(lastName))
@@ -79,8 +82,7 @@ namespace WriteApi
             }
 
             var fullName = $"{lastName}, {firstName}";
-            // TODO: Replace by enum value or external constant.
-            const int templateId = 21;
+            const int templateId = (int) EntityType.Employee;
 
             var startDate = DateTime.Now.Date;
             var endDate = DateTime.MaxValue.Date;
@@ -108,27 +110,23 @@ namespace WriteApi
                 return newEmployeeId;
             }
 
-            await InsertMutations(new List<Mutation>
+            var dataElements = _dataElementMapper.MapToDataElements(employee);
+            var mutations = new List<Mutation>();
+
+            foreach (var dataElement in dataElements)
             {
-                new Mutation
+                _logger.LogInformation($"Adding mutation for data element {dataElement.Id}, value '{dataElement.Value}'");
+                mutations.Add(new Mutation
                 {
                     EntityId = newEmployeeId,
-                    DataElementId = DataElement.LastName,
-                    FieldValue = lastName,
+                    DataElementId = dataElement.Id,
+                    FieldValue = dataElement.Value.ToString(),
                     StartDate = startDate,
                     EndDate = endDate
+                });
+            }
 
-                },
-                new Mutation
-                {
-                    EntityId = newEmployeeId,
-                    DataElementId = DataElement.FirstNames,
-                    FieldValue = firstName,
-                    StartDate = startDate,
-                    EndDate = endDate
-                }
-            });
-
+            await InsertMutations(mutations);
             return newEmployeeId;
         }
 
