@@ -7,6 +7,7 @@ namespace MutationExtractor
     public interface IDatabaseRepository
     {
         Task<bool> Verify(CancellationToken cancellationToken);
+
         IAsyncEnumerable<Change> GetChanges(CancellationToken cancellationToken);
     }
 }

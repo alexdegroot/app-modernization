@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -21,7 +22,7 @@ namespace MutationExtractor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if(!await _queue.Ensure(stoppingToken))
+            if (!await _queue.Ensure(stoppingToken))
             {
                 _logger.LogError("Couldn't ensure that Queue is there.");
                 await Task.CompletedTask;
@@ -34,16 +35,17 @@ namespace MutationExtractor
                 await Task.CompletedTask;
                 return;
             }
-            
-            
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 var changes = _database.GetChanges(stoppingToken).ConfigureAwait(true);
 
-                await foreach (var change in changes)
+                await foreach (var change in changes.WithCancellation(stoppingToken))
                 {
-                    _logger.LogInformation("Create Message: {guid}", change.Guid);
-                    await _queue.AddMessage($"New message {change.Guid}", stoppingToken).ConfigureAwait(false);
+                    var messageGuid = Guid.NewGuid();
+                    _logger.LogInformation("Create Message: {guid}", messageGuid);
+                    string message = JsonSerializer.Serialize(change);
+                    await _queue.AddMessage(message, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
