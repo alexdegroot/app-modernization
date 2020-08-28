@@ -71,6 +71,11 @@ namespace WriteApi
 
             // Perform some basic validations. Validation errors should probably be handled
             // in an alternative way.
+            if (employee.CompanyId <= 0)
+            {
+                throw new ArgumentException("Invalid Company ID", nameof(employee.CompanyId));
+            }
+
             if (string.IsNullOrWhiteSpace(firstName))
             {
                 throw new ArgumentException("Invalid First Name", nameof(employee.FirstNames));
@@ -91,10 +96,11 @@ namespace WriteApi
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string sql = @"INSERT INTO dbo.Entities (Description, TemplateId)
-                VALUES (@FullName, @TemplateId); SELECT @@IDENTITY";
+            const string sql = @"INSERT INTO dbo.Entities (ParentId, Description, TemplateId)
+                VALUES (@ParentId, @FullName, @TemplateId); SELECT @@IDENTITY";
 
             var cmd = new SqlCommand(sql);
+            AddCommandParameter(cmd, "@ParentId", employee.CompanyId, SqlDbType.Int);
             AddCommandParameter(cmd, "@FullName", fullName, SqlDbType.VarChar);
             AddCommandParameter(cmd, "@TemplateId", templateId, SqlDbType.Int);
             cmd.Connection = connection;
