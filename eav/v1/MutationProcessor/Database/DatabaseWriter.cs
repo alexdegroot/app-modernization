@@ -126,11 +126,11 @@ namespace MutationProcessor.Database
             return await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
         }
         
-        private async Task UpdateMutation(Change change, IMongoCollection<Entity> collection, CancellationToken cancellationToken)
+        private static async Task UpdateMutation(Change change, IMongoCollection<Entity> collection, CancellationToken cancellationToken)
         {
             var mutationFilter = Builders<Entity>.Filter.Where(x => x.Id == change.EntityId) &
                                  Builders<Entity>.Filter.ElemMatch(x => x.Mutations, Builders<Mutation>.Filter.Eq(x => x.MutationId, change.MutationId));
-            var update = Builders<Entity>.Update.Set("Mutations.$", new Mutation(change));
+            var update = Builders<Entity>.Update.Set(x => x.Mutations[-1], new Mutation(change));
             
             await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
         }

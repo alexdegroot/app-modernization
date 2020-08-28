@@ -43,7 +43,7 @@ namespace MutationProcessor.Queue
         public async IAsyncEnumerable<Message> GetChanges([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var messages = await _client.ReceiveMessagesAsync(10, cancellationToken: cancellationToken);
-
+            
             foreach (var message in messages.Value)
             {
                 var change = JsonSerializer.Deserialize<Change>(message.MessageText);

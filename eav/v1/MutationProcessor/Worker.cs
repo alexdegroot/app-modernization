@@ -47,7 +47,7 @@ namespace MutationProcessor
                     {
                         _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
                             change.EntityId, change.MutationId);
-                        await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
+                        //await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
                     }
                     else
                     {
