@@ -79,6 +79,7 @@ INSERT INTO dbo.Templates
     Id, Name
 )
 VALUES
+    (12, 'Land'),
     (15, 'Client'),
     (17, 'Company'),
     (21, 'Employee'),
@@ -91,23 +92,45 @@ INSERT INTO dbo.DataElements
     Id, Description
 )
 VALUES
-    (24, 'Last Name'),
-    (25, 'Initials'),
+    (10, 'Language'),
+    (22, 'Employee Code'),
+    (7014, 'Global Person Code'),
+    (524, 'Last Name'),
+    (24, 'Last Name At Birth'),
     (26, 'Last Name At Birth Prefix'),
-    (27, 'Partner Name'),
-    (35, 'BirthDate'),
-    (36, 'Gender'),
-    (38, 'Employment Indicator'),
-    (39, 'Hire Date'),  -- Datum indienst
     (51, 'First Names'),
-    (94, 'Prefix Titles'),  -- E.g. Drs
-    (95, 'Suffix Titles'),  -- E.g. MA
-    (165, 'First Name To Use'),  -- Roepnaam
+    (165, 'First Name To Use'),
+    (146, 'Formatted Name'),
+    (3000, 'Sort Name'),       
+    (25, 'Initials'),
+    (27, 'Partner Name'),
     (166, 'Partner Name Prefix'),
+    (94, 'Title Prefix'),     -- E.g. Drs
+    (95, 'Title Suffix'),     -- E.g. MA
+    (35, 'Date Of Birth'),
+    (10302568, 'Date Of Death'),
+    (36, 'Gender'),
+    (37, 'Marital Status'),
+    (38, 'Employment Indicator'),  -- In/uitdienst
+    (39, 'Hire Date'),  -- Datum indienst
     (308, 'First Hire Date'),  -- Eerste datum indienst
-    (7014, 'UPI'),
+    (10000018, 'National Identification Number'),
+    (40, 'End Date Employment'),
+    (10520479, 'Discharge Date'),  -- Geplande laatste datum indienst
+    (7212, 'Business Email Address'),
     (7213, 'Private Email Address'),
-    (10520479, 'DischargeDate')  -- Geplande laatste datum indienst
+    (7374, 'Business Phone Number'),
+    (7376, 'Private Phone Number'),
+    (7377, 'Mobile Phone Number'),
+    (10204761, 'Nationality'),
+    -- Address
+    (391, 'Street Name'),
+    (392, 'Street Number'),
+    (393, 'Street Number Additional'),
+    (394, 'Postal Code'),
+    (395, 'City'),
+    (34,  'Country')
+
 GO
 
 -- Insert a test client and some companies below it.
@@ -116,9 +139,20 @@ INSERT INTO dbo.Entities
     ParentId, Description, TemplateId
 )
 VALUES
-    (NULL, 'Metatech Nederland', 15),
-    (1, 'Metatech Administratie BV', 17),
-    (1, 'Metatech Constructie', 17),
-    (1, 'Metatech Horeca Services', 17),
-    (1, 'Metatech Wonen', 17)
+    (NULL, 'Nederland', 12),
+    (1, 'Metatech Nederland', 15),
+    (2, 'Metatech Administratie BV', 17),
+    (2, 'Metatech Constructie', 17),
+    (2, 'Metatech Horeca Services', 17),
+    (2, 'Metatech Wonen', 17)
 GO
+
+-- Insert initial Language value on country level.
+INSERT INTO dbo.Mutations
+(
+    EntityId, DataElementId, FieldValue, StartDate, EndDate
+)
+VALUES
+(
+    1, 10, 'NL', '2001-01-01', '9999-12-31'
+)

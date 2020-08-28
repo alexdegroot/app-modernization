@@ -3,8 +3,11 @@ PUT http://localhost:3000/employees
 Content-Type: application/json
 
 {
-  "FirstName":"John", 
-  "LastName":"Doo" 
+  "CompanyId": 3,
+  "FirstNames":"John", 
+  "LastName":"Doo",
+  "EmploymentIndicator":"1",
+  "MobilePhoneNumber":"0612345678"
 }
 
 ###
@@ -15,6 +18,6 @@ POST http://localhost:3000/employees/{{employeeId}}
 Content-Type: application/json
 
 {
-  "FirstName":"Johhny",
+  "FirstNames":"Johhny",
   "LastName":"Depp"
 }
