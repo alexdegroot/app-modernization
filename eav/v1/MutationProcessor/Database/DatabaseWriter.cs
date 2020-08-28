@@ -68,26 +68,26 @@ namespace MutationProcessor.Database
                 }
 
 
-                AddMutationIfNotExist(change, collection, cancellationToken);
+                //AddMutationIfNotExist(change, collection, cancellationToken);
 
-                // _logger.LogInformation($"Updating mutation if exist {change.MutationId}");
-                // var result = UpdateMutationIfExist(change, collection, cancellationToken);
-                //
-                // if (result.IsModifiedCountAvailable && result.ModifiedCount == 0)
-                // {
-                //     _logger.LogInformation($"Didn't update mutation");    
-                //     
-                //     _logger.LogInformation($"Insert new mutation"); 
-                //     var result2 = AppendMutation(change, collection, cancellationToken);
-                //     if (result2.IsModifiedCountAvailable && result.ModifiedCount > 0)
-                //     {
-                //         _logger.LogInformation("Mutation added");
-                //     }
-                // }
-                // else
-                // {
-                //     _logger.LogInformation($"Updated");
-                // }
+                _logger.LogInformation($"Updating mutation if exist {change.MutationId}");
+                var result = UpdateMutationIfExist(change, collection, cancellationToken);
+                
+                if (result.IsModifiedCountAvailable && result.ModifiedCount == 0)
+                {
+                    _logger.LogInformation($"Didn't update mutation");    
+                    
+                    _logger.LogInformation($"Insert new mutation"); 
+                    var result2 = AppendMutation(change, collection, cancellationToken);
+                    if (result2.IsModifiedCountAvailable && result.ModifiedCount > 0)
+                    {
+                        _logger.LogInformation("Mutation added");
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation($"Updated");
+                }
 
             }
             catch (MongoException e)

@@ -50,7 +50,7 @@ namespace MutationProcessor
                     },
                     new Change
                     {
-                        TenantId = 1000,
+                        TenantId = 1001,
                         EntityId = 400,
                         TemplateId = 19,
                         MutationId = 2,
@@ -59,7 +59,7 @@ namespace MutationProcessor
                     },
                     new Change
                     {
-                        TenantId = 1000,
+                        TenantId = 1002,
                         EntityId = 400,
                         TemplateId = 19,
                         MutationId = 1,
