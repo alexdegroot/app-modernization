@@ -33,5 +33,8 @@ COPY --from=build-env /app/out .
 # Disable globalization to avoud having to install 'icu'
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
+# Ensure that the code knows it runs in a container
+ENV DOTNET_RUNNING_IN_CONTAINER=1
+
 # Start application
 ENTRYPOINT "./${APPTORUN}"

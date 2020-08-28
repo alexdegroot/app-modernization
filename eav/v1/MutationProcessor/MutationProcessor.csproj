@@ -4,15 +4,12 @@
         <TargetFramework>net5.0</TargetFramework>
         <UserSecretsId>dotnet-WorkerService-948FB4FD-3737-4129-BC60-02A34E904313</UserSecretsId>
     </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(RunConfiguration)' == 'WorkerService' ">
-      <StartAction>Project</StartAction>
-      <EnvironmentVariables>
-        <Variable name="DOTNET_ENVIRONMENT" value="Development" />
-      </EnvironmentVariables>
-      <LaunchBrowser></LaunchBrowser>
-    </PropertyGroup>
+    
     <ItemGroup>
+        <PackageReference Include="Azure.Storage.Queues" Version="12.4.1" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0-preview.7.20364.11" />
+        <PackageReference Include="MongoDB.Bson" Version="2.10.4" />
+        <PackageReference Include="MongoDB.Driver" Version="2.10.4" />
+        <PackageReference Include="System.Linq.Async" Version="4.1.1" />
     </ItemGroup>
 </Project>

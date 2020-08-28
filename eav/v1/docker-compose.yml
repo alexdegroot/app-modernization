@@ -61,5 +61,7 @@ services:
       - mutationstore
       - rodb
     environment:
+      - MONGO_CONNECTIONSTRING=mongodb://rodb:rodb@host.docker.internal:27017
+      # Notice: I'm using 127.0.0.1 here due to a weird behavior inside the client for Azure Queue. This is fixed on runtime (ContainerQueueClient) 
       - QUEUE_CONNECTIONSTRING=DefaultEndpointsProtocol=http;AccountName=eavtonosql;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/eavtonosql;QueueEndpoint=http://127.0.0.1:10001/eavtonosql;
       - QUEUE_NAME=changes

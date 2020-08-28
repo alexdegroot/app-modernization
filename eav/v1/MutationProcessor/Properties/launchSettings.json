@@ -1,16 +1,12 @@
 {
   "profiles": {
-    "Mut": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
     "WorkerService": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "QUEUE_CONNECTIONSTRING": "DefaultEndpointsProtocol=http;AccountName=eavtonosql;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/eavtonosql;QueueEndpoint=http://127.0.0.1:10001/eavtonosql;",
+        "QUEUE_NAME" : "local",
+        "MONGO_CONNECTIONSTRING" : "mongodb://rodb:rodb@127.0.0.1:27017"
       }
     }
   }
