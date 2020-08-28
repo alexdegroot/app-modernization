@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace MutationProcessor.Database
 {
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-    internal class Mutation
+    public class Mutation
     {
         [BsonElement]
         public int MutationId { get; }
