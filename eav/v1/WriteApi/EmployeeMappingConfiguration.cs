@@ -40,7 +40,8 @@
                 .HasProperty(x => x.FormattedName, EavAttributes.FormattedName)
                 .HasProperty(x => x.SortName, EavAttributes.SortName)
                 .HasProperty(x => x.DischargeDate, EavAttributes.DischargeDate)
-                .HasProperty(x => x.Nationality, EavAttributes.Nationality);
+                .HasProperty(x => x.Nationality, EavAttributes.Nationality)
+                .HasProperty(x => x.Language, EavAttributes.Language);
         }
     }
 

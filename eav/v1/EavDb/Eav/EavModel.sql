@@ -79,6 +79,7 @@ INSERT INTO dbo.Templates
     Id, Name
 )
 VALUES
+    (12, 'Land'),
     (15, 'Client'),
     (17, 'Company'),
     (21, 'Employee'),
@@ -91,6 +92,7 @@ INSERT INTO dbo.DataElements
     Id, Description
 )
 VALUES
+    (10, 'Language'),
     (22, 'Employee Code'),
     (7014, 'Global Person Code'),
     (524, 'Last Name'),
@@ -137,9 +139,20 @@ INSERT INTO dbo.Entities
     ParentId, Description, TemplateId
 )
 VALUES
-    (NULL, 'Metatech Nederland', 15),
-    (1, 'Metatech Administratie BV', 17),
-    (1, 'Metatech Constructie', 17),
-    (1, 'Metatech Horeca Services', 17),
-    (1, 'Metatech Wonen', 17)
+    (NULL, 'Nederland', 12),
+    (1, 'Metatech Nederland', 15),
+    (2, 'Metatech Administratie BV', 17),
+    (2, 'Metatech Constructie', 17),
+    (2, 'Metatech Horeca Services', 17),
+    (2, 'Metatech Wonen', 17)
 GO
+
+-- Insert initial Language value on country level.
+INSERT INTO dbo.Mutations
+(
+    EntityId, DataElementId, FieldValue, StartDate, EndDate
+)
+VALUES
+(
+    1, 10, 'NL', '2001-01-01', '9999-12-31'
+)

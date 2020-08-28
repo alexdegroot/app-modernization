@@ -31,6 +31,7 @@ namespace WriteApi
         public const int EndDateEmployment = 40;  // Datum uitdienst
         public const int DischargeDate = 10520479;  // Geplande laatste datum indienst
         public const int Nationality = 10204761;
+        public const int Language = 10;
 
         public static class HomeAddress
         {

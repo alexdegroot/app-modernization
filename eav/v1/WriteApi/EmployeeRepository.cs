@@ -37,7 +37,7 @@ namespace WriteApi
             var lastName = employee.LastName;
 
             var startDate = DateTime.Now.Date;
-            var endDate = DateTime.MaxValue;
+            var endDate = DateTime.MaxValue.Date;
 
             // TODO: Following commands should only be run when the employee data element values have actually changed.
             await SetMutationDeleted(startDate, employeeId, EavAttributes.LastName);

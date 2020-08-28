@@ -6,6 +6,8 @@ namespace WriteApi
     {
         public int Id { get; set; }
 
+        public int CompanyId { get; set; }
+
         public string EmployeeCode { get; set; }
 
         public string GlobalPersonCode { get; set; }
@@ -49,6 +51,8 @@ namespace WriteApi
         public DateTime? DischargeDate { get; set; }
 
         public string Nationality { get; set; }
+
+        public string Language { get; set; }
 
         public string BusinessPhoneNumber { get; set; }
 
