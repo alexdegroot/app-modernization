@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
@@ -39,39 +40,21 @@ namespace MutationProcessor.Queue
             return false;
         }
 
-        public IAsyncEnumerable<Change> GetChanges(CancellationToken stoppingToken)
+        public async IAsyncEnumerable<Message> GetChanges([EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            return new []
+            var messages = await _client.ReceiveMessagesAsync(10, cancellationToken: cancellationToken);
+
+            foreach (var message in messages.Value)
             {
-                new Change
-                {
-                    TenantId = 1000,
-                    EntityId = 400,
-                    TemplateId = 19,
-                    MutationId = 1,
-                    FieldId = 12,
-                    Value = "yolo"
-                },
-                new Change
-                {
-                    TenantId = 1000,
-                    EntityId = 400,
-                    TemplateId = 19,
-                    MutationId = 2,
-                    FieldId = 12,
-                    Value = "yolo2"
-                },                
-                new Change
-                {
-                    TenantId = 1000,
-                    EntityId = 400,
-                    TemplateId = 19,
-                    MutationId = 1,
-                    FieldId = 12,
-                    Value = "updated value",
-                    IsDeleted = true
-                },                 
-            }.ToAsyncEnumerable();
+                var change = JsonSerializer.Deserialize<Change>(message.MessageText);
+                yield return new Message(message.MessageId, message.PopReceipt, change);
+            }
+        }
+
+        public async Task DeleteMessage(Message message, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"Removing message with id: {message.MessageId}");
+            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
         }
     }
 }

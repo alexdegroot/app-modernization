@@ -22,16 +22,18 @@ namespace MutationProcessor.Database
         public int Id { get; }
 
         [BsonElement]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime? StartDate { get; }
         
         [BsonElement]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime? EndDate { get; }
 
         [BsonElement]
         public int TemplateId { get; }
         [BsonElement]
         public bool IsDeleted { get; }
-
+        [BsonElement]
         public Mutation[] Mutations { get; }
     }
 }

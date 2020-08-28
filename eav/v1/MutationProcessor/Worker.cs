@@ -37,59 +37,26 @@ namespace MutationProcessor
             
             while (!stoppingToken.IsCancellationRequested)
             {
-                var changes = new[]
-                {
-                    new Change
-                    {
-                        TenantId = 1000,
-                        EntityId = 400,
-                        TemplateId = 19,
-                        MutationId = 1,
-                        FieldId = 12,
-                        Value = "yolo"
-                    },
-                    new Change
-                    {
-                        TenantId = 1001,
-                        EntityId = 400,
-                        TemplateId = 19,
-                        MutationId = 2,
-                        FieldId = 12,
-                        Value = "yolo2"
-                    },
-                    new Change
-                    {
-                        TenantId = 1002,
-                        EntityId = 400,
-                        TemplateId = 19,
-                        MutationId = 1,
-                        FieldId = 12,
-                        Value = "updated value",
-                        IsDeleted = true
-                    },
-                };
+                var messages = _reader.GetChanges(stoppingToken).ConfigureAwait(false);
 
-                foreach (var change in changes)
+                await foreach (var message in messages.WithCancellation(stoppingToken))
                 {
-                    _logger.LogInformation("Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.MutationId, change.MutationId);
-                    var result = await _writer.Append(change, stoppingToken)
-                        .ContinueWith(async x =>
+                    var change = message.Change;
+                    _logger.LogInformation("a1. Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
+                    if (await _writer.Append(change, stoppingToken).ConfigureAwait(true))
                     {
-                        await x;
-                        _logger.LogInformation("done");
-                    }, stoppingToken)
-                        .ConfigureAwait(false);
-                    _logger.LogInformation("En door!" + result.ToString());
-                    
-                    // if (result)
-                    // {
-                    //     _logger.LogInformation("Wel gelukt!");
-                    // }
+                        _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
+                            change.EntityId, change.MutationId);
+                        await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("a2. Couldn't process Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
+                    }
                 }
 
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.CompletedTask;
-                return;
+                await Task.Delay(100, stoppingToken).ConfigureAwait(true);
             }
         }
     }

@@ -7,6 +7,7 @@ namespace MutationProcessor
     public interface IQueueReader
     {
         Task<bool> Ensure(CancellationToken cancellationToken);
-        IAsyncEnumerable<Change> GetChanges(CancellationToken stoppingToken);
+        IAsyncEnumerable<Message> GetChanges(CancellationToken cancellationToken);
+        Task DeleteMessage(Message message, CancellationToken cancellationToken);
     }
 }
