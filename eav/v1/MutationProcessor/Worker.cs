@@ -21,42 +21,48 @@ namespace MutationProcessor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if(!await _reader.Ensure(stoppingToken))
+            try
             {
-                _logger.LogError("Couldn't ensure that Queue is there.");
-                await Task.CompletedTask;
-                return;
-            }
-
-            if (!await _writer.Verify(stoppingToken))
-            {
-                _logger.LogError("Couldn't verify database connection.");
-                await Task.CompletedTask;
-                return;
-            }
-            
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var messages = _reader.GetChanges(stoppingToken).ConfigureAwait(false);
-
-                await foreach (var message in messages.WithCancellation(stoppingToken))
+                if(!await _reader.Ensure(stoppingToken))
                 {
-                    var change = message.Change;
-                    _logger.LogInformation("a1. Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
-                    if (await _writer.Append(change, stoppingToken).ConfigureAwait(false))
-                    {
-                        _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
-                            change.EntityId, change.MutationId);
-                        //await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("a2. Couldn't process Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
-                    }
+                    _logger.LogError("Couldn't ensure that Queue is there.");
+                    return;
                 }
 
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(100, stoppingToken).ConfigureAwait(false);
+                if (!await _writer.Verify(stoppingToken))
+                {
+                    _logger.LogError("Couldn't verify database connection.");
+                    return;
+                }
+                
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    var messages = _reader.GetChanges(stoppingToken).ConfigureAwait(false);
+
+                    await foreach (var message in messages.WithCancellation(stoppingToken))
+                    {
+                        var change = message.Change;
+                        _logger.LogInformation("a1. Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
+                        if (await _writer.Append(change, stoppingToken).ConfigureAwait(false))
+                        {
+                            _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
+                                change.EntityId, change.MutationId);
+                            await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("a2. Couldn't process Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
+                        }
+                    }
+
+                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    await Task.Delay(100, stoppingToken).ConfigureAwait(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

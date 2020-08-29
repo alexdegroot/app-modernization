@@ -98,7 +98,7 @@ namespace MutationProcessor.Database
         {
             var options = new CreateIndexOptions();
             var indexModel = new CreateIndexModel<Entity>(
-                Builders<Entity>.IndexKeys.Ascending(nameof(Mutation) + "." + nameof(Mutation.MutationId)), options);
+                Builders<Entity>.IndexKeys.Ascending(nameof(Entity.Mutations) + "." + nameof(Mutation.MutationId)), options);
             await collection.Indexes.CreateOneAsync(indexModel);
         }
 
