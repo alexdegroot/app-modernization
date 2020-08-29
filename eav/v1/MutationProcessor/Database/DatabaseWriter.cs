@@ -121,13 +121,6 @@ namespace MutationProcessor.Database
             var mutationFilter = Builders<Entity>.Filter.And(
                 Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId),
                 Builders<Entity>.Filter.Ne("Mutations.MutationId", change.MutationId));
-            var mutationFilter2 = new BsonDocument("$and", new BsonArray
-            {
-                new BsonDocument("_id",
-                    new BsonDocument("$eq", change.EntityId)),
-                new BsonDocument("Mutations.MutationId",
-                    new BsonDocument("$ne", change.MutationId))
-            });
             var update = Builders<Entity>.Update.AddToSet(x => x.Mutations, new Mutation(change));
             return await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
         }
@@ -136,8 +129,7 @@ namespace MutationProcessor.Database
         {
             var mutationFilter = Builders<Entity>.Filter.And( 
                                     Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId),
-                                    Builders<Entity>.Filter.ElemMatch(x => x.Mutations, 
-                                        Builders<Mutation>.Filter.Eq(x => x.MutationId, change.MutationId)));
+                                    Builders<Entity>.Filter.Eq("Mutations.MutationId", change.MutationId));
             var update = Builders<Entity>.Update.Set(x => x.Mutations[-1], new Mutation(change));
             
             await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
