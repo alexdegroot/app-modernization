@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,7 +47,18 @@ namespace MutationProcessor.Queue
             
             foreach (var message in messages.Value)
             {
-                var change = JsonSerializer.Deserialize<Change>(message.MessageText);
+                Change change;
+                try
+                {
+                    var messageText = message.MessageText;
+                    change = JsonSerializer.Deserialize<Change>(messageText);
+                    
+                }
+                catch (JsonException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
                 yield return new Message(message.MessageId, message.PopReceipt, change);
             }
         }

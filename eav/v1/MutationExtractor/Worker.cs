@@ -38,14 +38,12 @@ namespace MutationExtractor
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var changes = _database.GetChanges(stoppingToken).ConfigureAwait(true);
+                var changes = _database.GetChanges(stoppingToken).ConfigureAwait(false);
 
                 await foreach (var change in changes.WithCancellation(stoppingToken))
                 {
-                    var messageGuid = Guid.NewGuid();
-                    _logger.LogInformation("Create Message: {guid}", messageGuid);
-                    string message = JsonSerializer.Serialize(change);
-                    await _queue.AddMessage(message, stoppingToken).ConfigureAwait(false);
+                   _logger.LogInformation("Create Message for Entity ID: {entityId} Mutation ID {mutationId}", change.EntityId, change.MutationId);
+                    await _queue.AddMessage(change, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);

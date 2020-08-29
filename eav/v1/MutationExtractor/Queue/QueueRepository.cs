@@ -1,8 +1,11 @@
 using System;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -38,10 +41,11 @@ namespace MutationExtractor.Queue
             return false;
         }
 
+        // TODO: error reporting
         public async Task AddMessage<T>(T message, CancellationToken cancellationToken)
         {
-            var json = JsonSerializer.Serialize(message);
-            await _client.SendMessageAsync(json, cancellationToken);
+            var finalMessage = JsonSerializer.Serialize(message);
+            await _client.SendMessageAsync(finalMessage, cancellationToken);
         }
     }
 }

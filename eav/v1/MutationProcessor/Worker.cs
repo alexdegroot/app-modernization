@@ -43,7 +43,7 @@ namespace MutationProcessor
                 {
                     var change = message.Change;
                     _logger.LogInformation("a1. Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
-                    if (await _writer.Append(change, stoppingToken).ConfigureAwait(true))
+                    if (await _writer.Append(change, stoppingToken).ConfigureAwait(false))
                     {
                         _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
                             change.EntityId, change.MutationId);
@@ -56,7 +56,7 @@ namespace MutationProcessor
                 }
 
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(100, stoppingToken).ConfigureAwait(true);
+                await Task.Delay(100, stoppingToken).ConfigureAwait(false);
             }
         }
     }

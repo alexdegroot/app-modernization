@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MutationProcessor.Database
@@ -51,7 +52,7 @@ namespace MutationProcessor.Database
                 // That would be preferred as it would be a single database call, now it's several
 
                 _logger.LogInformation($"b1: Upserting entity {change.EntityId}");
-                var entityResult =  await EnsureEntity(change, collection, cancellationToken).ConfigureAwait(true);
+                var entityResult =  await EnsureEntity(change, collection, cancellationToken).ConfigureAwait(false);
 
                 if (entityResult.UpsertedId != null)
                 {
@@ -95,10 +96,7 @@ namespace MutationProcessor.Database
 
         private static async Task CreateIndexes(IMongoCollection<Entity> collection)
         {
-            var options = new CreateIndexOptions
-            {
-                Unique = true
-            };
+            var options = new CreateIndexOptions();
             var indexModel = new CreateIndexModel<Entity>(
                 Builders<Entity>.IndexKeys.Ascending(nameof(Mutation) + "." + nameof(Mutation.MutationId)), options);
             await collection.Indexes.CreateOneAsync(indexModel);
@@ -109,6 +107,7 @@ namespace MutationProcessor.Database
             var upsert = new UpdateOptions { IsUpsert = true };
             var entityFilter = Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId);
             var fullInsert = Builders<Entity>.Update.Combine(
+                Builders<Entity>.Update.SetOnInsert(x => x.Id, change.EntityId),
                 Builders<Entity>.Update.Set(x => x.TemplateId, change.TemplateId),
                 Builders<Entity>.Update.Set(x => x.StartDate, change.EntityStartDate),
                 Builders<Entity>.Update.Set(x => x.EndDate, change.EntityEndDate),
@@ -119,17 +118,26 @@ namespace MutationProcessor.Database
         
         private static async Task<UpdateResult> AddMutationIfNotExist(Change change, IMongoCollection<Entity> collection, CancellationToken cancellationToken)
         {
-            var mutationFilter = Builders<Entity>.Filter.Not(
-                Builders<Entity>.Filter.Where(x => x.Id == change.EntityId) &
-                Builders<Entity>.Filter.ElemMatch(x => x.Mutations, Builders<Mutation>.Filter.Eq(x => x.MutationId, change.MutationId)));
+            var mutationFilter = Builders<Entity>.Filter.And(
+                Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId),
+                Builders<Entity>.Filter.Ne("Mutations.MutationId", change.MutationId));
+            var mutationFilter2 = new BsonDocument("$and", new BsonArray
+            {
+                new BsonDocument("_id",
+                    new BsonDocument("$eq", change.EntityId)),
+                new BsonDocument("Mutations.MutationId",
+                    new BsonDocument("$ne", change.MutationId))
+            });
             var update = Builders<Entity>.Update.AddToSet(x => x.Mutations, new Mutation(change));
             return await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
         }
         
         private static async Task UpdateMutation(Change change, IMongoCollection<Entity> collection, CancellationToken cancellationToken)
         {
-            var mutationFilter = Builders<Entity>.Filter.Where(x => x.Id == change.EntityId) &
-                                 Builders<Entity>.Filter.ElemMatch(x => x.Mutations, Builders<Mutation>.Filter.Eq(x => x.MutationId, change.MutationId));
+            var mutationFilter = Builders<Entity>.Filter.And( 
+                                    Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId),
+                                    Builders<Entity>.Filter.ElemMatch(x => x.Mutations, 
+                                        Builders<Mutation>.Filter.Eq(x => x.MutationId, change.MutationId)));
             var update = Builders<Entity>.Update.Set(x => x.Mutations[-1], new Mutation(change));
             
             await collection.UpdateOneAsync(mutationFilter, update, new UpdateOptions(), cancellationToken).ConfigureAwait(true);
