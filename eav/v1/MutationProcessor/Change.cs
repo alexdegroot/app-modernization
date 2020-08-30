@@ -1,10 +1,13 @@
 using System;
+using System.Text.Json.Serialization;
+using MutationProcessor.Queue;
 
 namespace MutationProcessor
 {
     public class Change
     {
         public int TenantId { get; set; }
+        
         public int EntityId { get; set; }
         
         public int EntityParentId { get; set; }
@@ -21,6 +24,7 @@ namespace MutationProcessor
 
         public DateTime? MutationEndDate { get; set; }
 
+        [JsonConverter(typeof(FieldValueConverter))]
         public object FieldValue { get; set; }
 
         public bool MutationDeleted { get; set; }

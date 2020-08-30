@@ -23,11 +23,11 @@ namespace MutationExtractor.Database
 
         public async Task<bool> Verify(CancellationToken cancellationToken)
         {
-            for(var i = 1; i <= 10; i++)
+            for(var i = 1; i <= 100; i++)
             {
                 _logger.LogInformation("Connection to database, attempt: " + i);
-                if (await CanConnectToDatabase(cancellationToken)) return true;
-                await Task.Delay(1000, cancellationToken);
+                if (await CanConnectToDatabase(cancellationToken).ConfigureAwait(false)) return true;
+                await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
             }
 
             return false;
