@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -22,17 +21,15 @@ namespace MutationExtractor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (!await _queue.Ensure(stoppingToken))
+            if (!await _queue.Ensure(stoppingToken).ConfigureAwait(false))
             {
                 _logger.LogError("Couldn't ensure that Queue is there.");
-                await Task.CompletedTask;
                 return;
             }
 
-            if (!await _database.Verify(stoppingToken))
+            if (!await _database.Verify(stoppingToken).ConfigureAwait(true))
             {
                 _logger.LogError("Couldn't verify database connection.");
-                await Task.CompletedTask;
                 return;
             }
 

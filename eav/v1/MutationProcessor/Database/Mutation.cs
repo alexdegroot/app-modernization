@@ -23,11 +23,11 @@ namespace MutationProcessor.Database
         public Mutation(Change change)
         {
             MutationId = change.MutationId;
+            StartDate = change.MutationStartDate;
+            EndDate = change.MutationEndDate;
+            IsDeleted = change.MutationDeleted;
             FieldId = change.FieldId;
-            StartDate = change.StartDate;
-            EndDate = change.EndDate;
-            Value = change.Value;
-            IsDeleted = change.IsDeleted;
+            Value = change.FieldValue;
         }
     }
 }

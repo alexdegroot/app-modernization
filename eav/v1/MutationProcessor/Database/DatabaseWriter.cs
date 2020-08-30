@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MutationProcessor.Database
@@ -108,10 +107,9 @@ namespace MutationProcessor.Database
             var entityFilter = Builders<Entity>.Filter.Eq(x => x.Id, change.EntityId);
             var fullInsert = Builders<Entity>.Update.Combine(
                 Builders<Entity>.Update.SetOnInsert(x => x.Id, change.EntityId),
-                Builders<Entity>.Update.Set(x => x.TemplateId, change.TemplateId),
-                Builders<Entity>.Update.Set(x => x.StartDate, change.EntityStartDate),
-                Builders<Entity>.Update.Set(x => x.EndDate, change.EntityEndDate),
-                Builders<Entity>.Update.Set(x => x.IsDeleted, change.IsDeleted)
+                Builders<Entity>.Update.Set(x => x.ParentId, change.EntityParentId),
+                Builders<Entity>.Update.Set(x => x.TemplateId, change.EntityTemplateId),
+                Builders<Entity>.Update.Set(x => x.IsDeleted, change.EntityDeleted)
             );
             return await collection.UpdateOneAsync(entityFilter, fullInsert, upsert, cancellationToken);
         }

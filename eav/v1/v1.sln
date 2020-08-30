@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{1FE50C88-5DDA-4FC0-BDD8-A9B838F3AD01}"
 ProjectSection(SolutionItems) = preProject
 	docker-compose.yml = docker-compose.yml
+	..\..\README.md = ..\..\README.md
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadApi", "ReadApi\ReadApi.csproj", "{E66F563D-42D5-4C23-9BF0-E00E1CC301DA}"

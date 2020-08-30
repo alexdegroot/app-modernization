@@ -1,11 +1,8 @@
 using System;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
-using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -28,7 +25,7 @@ namespace MutationExtractor.Queue
         {
             try
             {
-                var result = await _client.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+                var result = await _client.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                 if (result == null || result.Status == 201 || result.Status == 204)
                 {
                     return true;
