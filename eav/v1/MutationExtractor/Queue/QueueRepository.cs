@@ -25,7 +25,7 @@ namespace MutationExtractor.Queue
         {
             try
             {
-                var result = await _client.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+                var result = await _client.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                 if (result == null || result.Status == 201 || result.Status == 204)
                 {
                     return true;
@@ -38,10 +38,11 @@ namespace MutationExtractor.Queue
             return false;
         }
 
+        // TODO: error reporting
         public async Task AddMessage<T>(T message, CancellationToken cancellationToken)
         {
-            var json = JsonSerializer.Serialize(message);
-            await _client.SendMessageAsync(json, cancellationToken);
+            var finalMessage = JsonSerializer.Serialize(message);
+            await _client.SendMessageAsync(finalMessage, cancellationToken);
         }
     }
 }

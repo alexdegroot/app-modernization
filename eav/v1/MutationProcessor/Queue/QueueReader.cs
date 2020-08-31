@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -42,13 +44,39 @@ namespace MutationProcessor.Queue
 
         public async IAsyncEnumerable<Message> GetChanges([EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var messages = await _client.ReceiveMessagesAsync(10, cancellationToken: cancellationToken);
+            var messages = await GetMessages(cancellationToken);
             
-            foreach (var message in messages.Value)
+            foreach (var message in messages)
             {
-                var change = JsonSerializer.Deserialize<Change>(message.MessageText);
+                Change change;
+                try
+                {
+                    var messageText = message.MessageText;
+                    change = JsonSerializer.Deserialize<Change>(messageText);
+                    
+                }
+                catch (JsonException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
                 yield return new Message(message.MessageId, message.PopReceipt, change);
             }
+        }
+
+        private async Task<IEnumerable<QueueMessage>> GetMessages(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var response = await _client.ReceiveMessagesAsync(10, cancellationToken: cancellationToken);
+                return response.Value;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Couldn't receive messages from the queue", e);
+            }
+
+            return Enumerable.Empty<QueueMessage>();
         }
 
         public async Task DeleteMessage(Message message, CancellationToken cancellationToken)

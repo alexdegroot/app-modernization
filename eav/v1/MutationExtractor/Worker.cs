@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -22,30 +21,26 @@ namespace MutationExtractor
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (!await _queue.Ensure(stoppingToken))
+            if (!await _queue.Ensure(stoppingToken).ConfigureAwait(false))
             {
                 _logger.LogError("Couldn't ensure that Queue is there.");
-                await Task.CompletedTask;
                 return;
             }
 
-            if (!await _database.Verify(stoppingToken))
+            if (!await _database.Verify(stoppingToken).ConfigureAwait(true))
             {
                 _logger.LogError("Couldn't verify database connection.");
-                await Task.CompletedTask;
                 return;
             }
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var changes = _database.GetChanges(stoppingToken).ConfigureAwait(true);
+                var changes = _database.GetChanges(stoppingToken).ConfigureAwait(false);
 
                 await foreach (var change in changes.WithCancellation(stoppingToken))
                 {
-                    var messageGuid = Guid.NewGuid();
-                    _logger.LogInformation("Create Message: {guid}", messageGuid);
-                    string message = JsonSerializer.Serialize(change);
-                    await _queue.AddMessage(message, stoppingToken).ConfigureAwait(false);
+                   _logger.LogInformation("Create Message for Entity ID: {entityId} Mutation ID {mutationId}", change.EntityId, change.MutationId);
+                    await _queue.AddMessage(change, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);

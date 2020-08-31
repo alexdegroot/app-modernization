@@ -23,6 +23,18 @@ namespace MutationExtractor.Database
 
         public async Task<bool> Verify(CancellationToken cancellationToken)
         {
+            for(var i = 1; i <= 100; i++)
+            {
+                _logger.LogInformation("Connection to database, attempt: " + i);
+                if (await CanConnectToDatabase(cancellationToken).ConfigureAwait(false)) return true;
+                await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> CanConnectToDatabase(CancellationToken cancellationToken)
+        {
             try
             {
                 await using var connection = new SqlConnection(_connectionString);
@@ -35,7 +47,8 @@ namespace MutationExtractor.Database
             }
             catch (SqlException e)
             {
-                _logger.LogError("Couldn't connect to database.", e);
+                _logger.LogError("Can't verify the database connection.", e);
+                _logger.LogError(e.Message, e);
             }
 
             return false;
@@ -46,8 +59,20 @@ namespace MutationExtractor.Database
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync(cancellationToken);
 
-            const string sql = @"SELECT Id, EntityId, DataElementId, FieldValue, StartDate,
-                                    EndDate, Deleted FROM dbo.Mutations";
+            const string sql = @"SELECT 
+                                       e.TenantId,
+                                       e.Id as EntityId,
+                                       e.ParentId as EntityParentId,
+                                       e.Deleted as EntityDeleted,
+                                       e.TemplateId as EntityTemplateId,
+                                       m.Id as MutationId,
+                                       m.DataElementId as FieldId,
+                                       m.FieldValue,
+                                       m.StartDate as MutationStartDate,
+                                       m.EndDate as MutationEndDate,
+                                       m.Deleted as MutationDeleted
+                                FROM dbo.Mutations as m
+                                INNER JOIN dbo.Entities as e ON e.Id = m.EntityId";
             var command = connection.CreateCommand();
             command.CommandText = sql;
 
@@ -56,13 +81,17 @@ namespace MutationExtractor.Database
             {
                 var change = new Change
                 {
-                    MutationId = await GetColumnValue<int>(reader, "Id"),
-                    EntityId = await GetColumnValue<int>(reader, "EntityId"),
-                    FieldId = await GetColumnValue<int>(reader, "DataElementId"),
-                    Value = await GetColumnValue<object>(reader, "DataElementId"),
-                    StartDate = await GetColumnValue<DateTime>(reader, "StartDate"),
-                    EndDate = await GetColumnValue<DateTime>(reader, "EndDate"),
-                    IsDeleted = await GetColumnValue<bool>(reader, "Deleted"),
+                    TenantId = await GetColumnValue<int>(reader, nameof(Change.TenantId)),
+                    EntityId = await GetColumnValue<int>(reader, nameof(Change.EntityId)),
+                    EntityParentId = await GetColumnValue<int>(reader, nameof(Change.EntityParentId)),
+                    EntityDeleted = await GetColumnValue<bool>(reader, nameof(Change.EntityDeleted)), 
+                    EntityTemplateId = await GetColumnValue<int>(reader, nameof(Change.EntityTemplateId)),
+                    MutationId = await GetColumnValue<int>(reader, nameof(Change.MutationId)),
+                    FieldId = await GetColumnValue<int>(reader, nameof(Change.FieldId)),
+                    FieldValue = await GetColumnValue<object>(reader, nameof(Change.FieldValue)),
+                    MutationStartDate = await GetColumnValue<DateTime>(reader, nameof(Change.MutationStartDate)),
+                    MutationEndDate = await GetColumnValue<DateTime>(reader, nameof(Change.MutationEndDate)),
+                    MutationDeleted = await GetColumnValue<bool>(reader, nameof(Change.MutationDeleted))
                 };
                 yield return change;
             }
