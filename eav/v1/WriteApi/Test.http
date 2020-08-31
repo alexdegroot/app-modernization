@@ -7,7 +7,8 @@ Content-Type: application/json
   "FirstNames":"John", 
   "LastName":"Doo",
   "EmploymentIndicator":"1",
-  "MobilePhoneNumber":"0612345678"
+  "MobilePhoneNumber":"0612345678",
+  "Language":"EN"
 }
 
 ###
@@ -19,5 +20,6 @@ Content-Type: application/json
 
 {
   "FirstNames":"Johhny",
-  "LastName":"Depp"
+  "LastName":"Depp",
+  "EmploymentIndicator":"2"
 }

@@ -33,35 +33,13 @@ namespace WriteApi
                 throw new ArgumentException("Invalid Employee ID", nameof(employeeId));
             }
 
-            var firstName = employee.FirstNames;
-            var lastName = employee.LastName;
-
             var startDate = DateTime.Now.Date;
             var endDate = DateTime.MaxValue.Date;
 
             // TODO: Following commands should only be run when the employee data element values have actually changed.
-            await SetMutationDeleted(startDate, employeeId, EavAttributes.LastName);
-            await SetMutationDeleted(startDate, employeeId, EavAttributes.FirstNames);
-            await InsertMutations(new List<Mutation>
-            {
-                new Mutation
-                {
-                    EntityId = employeeId,
-                    DataElementId = EavAttributes.LastName,
-                    FieldValue = lastName,
-                    StartDate = startDate,
-                    EndDate = endDate,
-
-                },
-                new Mutation
-                {
-                    EntityId = employeeId,
-                    DataElementId = EavAttributes.FirstNames,
-                    FieldValue = firstName,
-                    StartDate = startDate,
-                    EndDate = endDate,
-                }
-            });
+            var dataElements = _dataElementMapper.MapToDataElements(employee);
+            await SetMutationsDeleted(employeeId, startDate, dataElements);
+            await InsertMutations(employeeId, startDate, endDate, dataElements);
         }
 
         public async Task<int> Add(Employee employee)
@@ -117,6 +95,46 @@ namespace WriteApi
             }
 
             var dataElements = _dataElementMapper.MapToDataElements(employee);
+            await InsertMutations(newEmployeeId, startDate, endDate, dataElements);
+            return newEmployeeId;
+        }
+
+        /// <summary>
+        /// Sets the 'Deleted' status of mutations that correspond to the specified entityId,
+        /// reference date and data elements.
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <param name="referenceDate"></param>
+        /// <param name="dataElements"></param>
+        /// <returns></returns>
+        private async Task SetMutationsDeleted(int entityId, DateTime referenceDate,
+            IEnumerable<DataElement> dataElements)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            foreach (var dataElement in dataElements)
+            {
+                _logger.LogInformation($"Setting delete status for entity {entityId}, ref. date {referenceDate}, data element '{dataElement.Id}.");
+
+                const string sql = @"
+                UPDATE dbo.Mutations SET Deleted = 1, EndDate = @ReferenceDate
+                    WHERE EntityId = @EntityId AND DataElementId = @DataElementId
+                    AND @ReferenceDate BETWEEN StartDate and EndDate";
+
+                var cmd = new SqlCommand(sql);
+                AddCommandParameter(cmd, "@ReferenceDate", referenceDate, SqlDbType.DateTime);
+                AddCommandParameter(cmd, "@EntityId", entityId, SqlDbType.Int);
+                AddCommandParameter(cmd, "@DataElementId", dataElement.Id, SqlDbType.Int);
+                cmd.Connection = connection;
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        private async Task InsertMutations(int entityId,
+            DateTime startDate, DateTime endDate, IEnumerable<DataElement> dataElements)
+        {
             var mutations = new List<Mutation>();
 
             foreach (var dataElement in dataElements)
@@ -124,7 +142,7 @@ namespace WriteApi
                 _logger.LogInformation($"Adding mutation for data element {dataElement.Id}, value '{dataElement.Value}'");
                 mutations.Add(new Mutation
                 {
-                    EntityId = newEmployeeId,
+                    EntityId = entityId,
                     DataElementId = dataElement.Id,
                     FieldValue = dataElement.Value.ToString(),
                     StartDate = startDate,
@@ -133,27 +151,6 @@ namespace WriteApi
             }
 
             await InsertMutations(mutations);
-            return newEmployeeId;
-        }
-
-        private async Task SetMutationDeleted(DateTime referenceDate,
-            int entityId, int dataElementId)
-        {
-            await using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            const string sql = @"
-                UPDATE dbo.Mutations SET Deleted = 1, EndDate = @ReferenceDate
-                    WHERE EntityId = @EntityId AND DataElementId = @DataElementId
-                    AND @ReferenceDate BETWEEN StartDate and EndDate";
-
-            var cmd = new SqlCommand(sql);
-            AddCommandParameter(cmd, "@ReferenceDate", referenceDate, SqlDbType.DateTime);
-            AddCommandParameter(cmd, "@EntityId", entityId, SqlDbType.Int);
-            AddCommandParameter(cmd, "@DataElementId", dataElementId, SqlDbType.Int);
-            cmd.Connection = connection;
-
-            await cmd.ExecuteNonQueryAsync();
         }
 
         private async Task InsertMutations(IEnumerable<Mutation> mutations)
