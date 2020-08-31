@@ -10,6 +10,11 @@
         <KnownFrameworkReference Update="Microsoft.AspNetCore.App" IsTrimmable="true" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MongoDB.Bson" Version="2.10.4" />
+      <PackageReference Include="MongoDB.Driver" Version="2.10.4" />
+    </ItemGroup>
+
     <Target Name="SkipLinkingAssemblies" BeforeTargets="PrepareForILLink">
         <ItemGroup>
             <ManagedAssemblyToLink Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.AspNetCore.DataProtection'))" IsTrimmable="false" TrimMode="copyused" />
