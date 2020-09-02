@@ -5,6 +5,7 @@ namespace MutationExtractor
     public class Change
     {
         public int TenantId { get; set; }
+
         public int EntityId { get; set; }
         
         public int EntityParentId { get; set; }
