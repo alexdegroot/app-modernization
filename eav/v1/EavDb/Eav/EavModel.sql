@@ -36,11 +36,11 @@ GO
 CREATE TABLE dbo.Entities
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    ParentId INT NULL,
-    Description VARCHAR(100) NULL,
+    ParentId INT,
+    Description VARCHAR(100),
     TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
-    TenantId INT NULL,
-    Deleted BIT NULL
+    TenantId INT NOT NULL,
+    Deleted BIT
 )
 
 -- Contains data elements for which values can be stored in the Mutations table.
@@ -48,8 +48,7 @@ CREATE TABLE dbo.DataElements
 (
     Id INT PRIMARY KEY,
     Description VARCHAR(100),
-    TenantId INT NULL,
-    Deleted BIT NULL
+    Deleted BIT
 )
 
 -- Defines which data elements are allowed for certain templates / entity types.
@@ -66,10 +65,10 @@ CREATE TABLE dbo.Mutations
     Id INT IDENTITY(1,1) PRIMARY KEY,
     EntityId INT FOREIGN KEY REFERENCES Entities(ID),
     DataElementId INT FOREIGN KEY REFERENCES DataElements(ID),
-    FieldValue VARCHAR(100) NULL,
+    FieldValue VARCHAR(100),
     StartDate DATETIME,
     EndDate DATETIME,
-    Deleted BIT NULL
+    Deleted BIT
 )
 GO
 
@@ -123,7 +122,7 @@ VALUES
     (7376, 'Private Phone Number'),
     (7377, 'Mobile Phone Number'),
     (10204761, 'Nationality'),
-    -- Address
+    -- Address fields
     (391, 'Street Name'),
     (392, 'Street Number'),
     (393, 'Street Number Additional'),
@@ -136,15 +135,19 @@ GO
 -- Insert a test client and some companies below it.
 INSERT INTO dbo.Entities
 (
-    ParentId, Description, TemplateId
+    ParentId, Description, TemplateId, TenantId
 )
 VALUES
-    (NULL, 'Nederland', 12),
-    (1, 'Metatech Nederland', 15),
-    (2, 'Metatech Administratie BV', 17),
-    (2, 'Metatech Constructie', 17),
-    (2, 'Metatech Horeca Services', 17),
-    (2, 'Metatech Wonen', 17)
+    (NULL, 'Nederland', 12, 0),
+    (1, 'Metatech Nederland', 15, 2),
+    (1, 'Volvo Nederland B.V.', 15, 3),
+    (2, 'Metatech Administratie BV', 17, 2),
+    (2, 'Metatech Constructie', 17, 2),
+    (2, 'Metatech Horeca Services', 17, 2),
+    (2, 'Metatech Wonen', 17, 2),
+    (3, 'Volvo Nederland B.V.', 17, 3),
+    (3, 'VFS Financial Services B.V.', 17, 3),
+    (3, 'Volvo Truck Center B.V.', 17, 3)
 GO
 
 -- Insert initial Language value on country level.

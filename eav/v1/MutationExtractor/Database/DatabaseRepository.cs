@@ -71,8 +71,9 @@ namespace MutationExtractor.Database
                                        m.StartDate as MutationStartDate,
                                        m.EndDate as MutationEndDate,
                                        m.Deleted as MutationDeleted
-                                FROM dbo.Mutations as m
-                                INNER JOIN dbo.Entities as e ON e.Id = m.EntityId";
+                                FROM dbo.Entities as e
+                                LEFT JOIN dbo.Mutations as m
+                                ON m.EntityId = e.Id";
             var command = connection.CreateCommand();
             command.CommandText = sql;
 

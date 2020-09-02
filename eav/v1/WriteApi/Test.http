@@ -3,6 +3,7 @@ PUT http://localhost:3000/employees
 Content-Type: application/json
 
 {
+  "TenantId": 2,
   "CompanyId": 3,
   "FirstNames":"John", 
   "LastName":"Doo",

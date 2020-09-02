@@ -6,6 +6,8 @@ namespace WriteApi
     {
         public int Id { get; set; }
 
+        public int TenantId { get; set; }
+
         public int CompanyId { get; set; }
 
         public string EmployeeCode { get; set; }
