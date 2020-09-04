@@ -1,26 +1,42 @@
-# @name createEmployee
+# @name createEmployee1
 PUT http://localhost:3000/employees
 Content-Type: application/json
 
 {
   "TenantId": 2,
-  "CompanyId": 3,
-  "FirstNames":"John", 
-  "LastName":"Doo",
-  "EmploymentIndicator":"1",
-  "MobilePhoneNumber":"0612345678",
-  "Language":"EN"
+  "CompanyId": 4,
+  "EmployeeCode": "653",
+  "FirstNames": "Hendrik", 
+  "LastName": "De Voogd",
+  "LastNameAtBirth": "Voogd",
+  "Initials": "A.H.",
+  "LastNameAtBirthPrefix": "de",
+  "EmploymentIndicator": "1"
 }
 
 ###
-@employeeId = {{createEmployee.response.body.$.id}}
+@employeeId = {{createEmployee1.response.body.$.id}}
 
 # @name updateEmployee
 POST http://localhost:3000/employees/{{employeeId}}
 Content-Type: application/json
 
 {
-  "FirstNames":"Johhny",
-  "LastName":"Depp",
-  "EmploymentIndicator":"2"
+  "EmploymentIndicator": "2"
+}
+
+###
+# @name createEmployee2
+PUT http://localhost:3000/employees
+Content-Type: application/json
+
+{
+  "TenantId": 2,
+  "CompanyId": 4,
+  "EmployeeCode": "688",
+  "FirstNames": "Joop", 
+  "LastName": "Janssen",
+  "LastNameAtBirth": "Janssen",
+  "Initials": "J.P.",
+  "EmploymentIndicator": "1"
 }
