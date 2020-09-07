@@ -4,6 +4,8 @@ services:
     build:
       context: ./ReadApi
       dockerfile: ./Dockerfile
+    environment:
+      - MONGO_CONNECTIONSTRING=mongodb://rodb:rodb@host.docker.internal:27017
     ports:
       - '2000:80'
     depends_on:

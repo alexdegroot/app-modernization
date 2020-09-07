@@ -46,6 +46,7 @@ namespace WriteApi
         {
             var firstName = employee.FirstNames;
             var lastName = employee.LastName;
+            var employeeCode = employee.EmployeeCode;
 
             // Perform some basic validations. Validation errors should probably be handled
             // in an alternative way.
@@ -69,6 +70,11 @@ namespace WriteApi
                 throw new ArgumentException("Invalid Last Name", nameof(employee.LastName));
             }
 
+            if (string.IsNullOrWhiteSpace(employeeCode))
+            {
+                throw new ArgumentException("Invalid Employee Code", nameof(employee.EmployeeCode));
+            }
+
             var fullName = $"{lastName}, {firstName}";
             const int templateId = (int) EntityType.Employee;
 
@@ -79,11 +85,12 @@ namespace WriteApi
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string sql = @"INSERT INTO dbo.Entities (ParentId, Description, TemplateId, TenantId)
-                VALUES (@ParentId, @FullName, @TemplateId, @TenantId); SELECT @@IDENTITY";
+            const string sql = @"INSERT INTO dbo.Entities (ParentId, Code, Description, TemplateId, TenantId)
+                VALUES (@ParentId, @EmployeeCode, @FullName, @TemplateId, @TenantId); SELECT @@IDENTITY";
 
             var cmd = new SqlCommand(sql);
             AddCommandParameter(cmd, "@ParentId", employee.CompanyId, SqlDbType.Int);
+            AddCommandParameter(cmd, "@EmployeeCode", employee.EmployeeCode, SqlDbType.VarChar);
             AddCommandParameter(cmd, "@FullName", fullName, SqlDbType.VarChar);
             AddCommandParameter(cmd, "@TemplateId", templateId, SqlDbType.Int);
             AddCommandParameter(cmd, "@TenantId", employee.TenantId, SqlDbType.Int);

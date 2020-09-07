@@ -37,6 +37,7 @@ CREATE TABLE dbo.Entities
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     ParentId INT,
+    Code VARCHAR(100) NOT NULL,  -- Custom code for the entity (contrary to the Id, which is technical key).
     Description VARCHAR(100),
     TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
     TenantId INT NOT NULL,
@@ -132,22 +133,22 @@ VALUES
 
 GO
 
--- Insert a test client and some companies below it.
+-- Insert a country, test clients (template 15) and some companies below them (template 17).
 INSERT INTO dbo.Entities
 (
-    ParentId, Description, TemplateId, TenantId
+    ParentId, Code, Description, TemplateId, TenantId
 )
 VALUES
-    (NULL, 'Nederland', 12, 0),
-    (1, 'Metatech Nederland', 15, 2),
-    (1, 'Volvo Nederland B.V.', 15, 3),
-    (2, 'Metatech Administratie BV', 17, 2),
-    (2, 'Metatech Constructie', 17, 2),
-    (2, 'Metatech Horeca Services', 17, 2),
-    (2, 'Metatech Wonen', 17, 2),
-    (3, 'Volvo Nederland B.V.', 17, 3),
-    (3, 'VFS Financial Services B.V.', 17, 3),
-    (3, 'Volvo Truck Center B.V.', 17, 3)
+    (NULL, 'NL', 'Nederland', 12, 0),
+    (1, '4024898', 'Metatech Nederland', 15, 2),
+    (1, '5031084', 'Volvo Nederland B.V.', 15, 3),
+    (2, '030', 'Metatech Administratie B.V.', 17, 2),
+    (2, '800', 'Metatech Constructie', 17, 2),
+    (2, '020', 'Metatech Horeca Services', 17, 2),
+    (2, '040', 'Metatech Wonen', 17, 2),
+    (3, 'DD41', 'Volvo Nederland B.V.', 17, 3),
+    (3, 'HH48', 'VFS Financial Services B.V.', 17, 3),
+    (3, 'HH55', 'Volvo Truck Center B.V.', 17, 3)
 GO
 
 -- Insert initial Language value on country level.
