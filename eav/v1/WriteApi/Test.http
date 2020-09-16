@@ -3,8 +3,9 @@ PUT http://localhost:3000/employees
 Content-Type: application/json
 
 {
-  "TenantId": 2,
-  "CompanyId": 4,
+  "Id": 10503058,
+  "TenantId": 10029872,
+  "CompanyId": 10028636,
   "EmployeeCode": "653",
   "FirstNames": "Hendrik", 
   "LastName": "De Voogd",
@@ -15,10 +16,8 @@ Content-Type: application/json
 }
 
 ###
-@employeeId = {{createEmployee1.response.body.$.id}}
-
 # @name updateEmployee
-POST http://localhost:3000/employees/{{employeeId}}
+POST http://localhost:3000/employees/10503058
 Content-Type: application/json
 
 {
@@ -31,8 +30,9 @@ PUT http://localhost:3000/employees
 Content-Type: application/json
 
 {
-  "TenantId": 2,
-  "CompanyId": 4,
+  "Id": 10503060,
+  "TenantId": 10029872,
+  "CompanyId": 10028636,
   "EmployeeCode": "688",
   "FirstNames": "Joop", 
   "LastName": "Janssen",
