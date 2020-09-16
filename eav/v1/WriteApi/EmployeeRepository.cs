@@ -42,7 +42,7 @@ namespace WriteApi
             await InsertMutations(employeeId, startDate, endDate, dataElements);
         }
 
-        public async Task<int> Add(Employee employee)
+        public async Task Add(Employee employee)
         {
             var firstName = employee.FirstNames;
             var lastName = employee.LastName;
@@ -50,6 +50,11 @@ namespace WriteApi
 
             // Perform some basic validations. Validation errors should probably be handled
             // in an alternative way.
+            if (employee.Id <= 0)
+            {
+                throw new ArgumentException("Invalid Employee ID", nameof(employee.Id));
+            }
+
             if (employee.TenantId <= 0)
             {
                 throw new ArgumentException("Invalid Tenant ID", nameof(employee.TenantId));
@@ -80,36 +85,27 @@ namespace WriteApi
 
             var startDate = DateTime.Now.Date;
             var endDate = DateTime.MaxValue.Date;
-            int newEmployeeId = -1;
 
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            const string sql = @"INSERT INTO dbo.Entities (ParentId, Code, Description, TemplateId, TenantId)
-                VALUES (@ParentId, @EmployeeCode, @FullName, @TemplateId, @TenantId); SELECT @@IDENTITY";
+            const string sql = @"INSERT INTO dbo.Entities (Id, ParentId, Code, Description, TemplateId, TenantId, Deleted)
+                VALUES (@Id, @ParentId, @EmployeeCode, @FullName, @TemplateId, @TenantId, @Deleted)";
 
             var cmd = new SqlCommand(sql);
+            AddCommandParameter(cmd, "@Id", employee.Id, SqlDbType.Int);
             AddCommandParameter(cmd, "@ParentId", employee.CompanyId, SqlDbType.Int);
             AddCommandParameter(cmd, "@EmployeeCode", employee.EmployeeCode, SqlDbType.VarChar);
             AddCommandParameter(cmd, "@FullName", fullName, SqlDbType.VarChar);
             AddCommandParameter(cmd, "@TemplateId", templateId, SqlDbType.Int);
             AddCommandParameter(cmd, "@TenantId", employee.TenantId, SqlDbType.Int);
+            AddCommandParameter(cmd, "@Deleted", 0, SqlDbType.Bit);
             cmd.Connection = connection;
-
-            var idObject = await cmd.ExecuteScalarAsync();
-            if (idObject != DBNull.Value)
-            {
-                newEmployeeId = Convert.ToInt32(idObject);
-            }
-
-            if (newEmployeeId <= 0)
-            {
-                return newEmployeeId;
-            }
+            await cmd.ExecuteNonQueryAsync();
+            _logger.LogInformation($"Entity ID: {employee.Id}");
 
             var dataElements = _dataElementMapper.MapToDataElements(employee);
-            await InsertMutations(newEmployeeId, startDate, endDate, dataElements);
-            return newEmployeeId;
+            await InsertMutations(employee.Id, startDate, endDate, dataElements);
         }
 
         /// <summary>
@@ -159,7 +155,8 @@ namespace WriteApi
                     DataElementId = dataElement.Id,
                     FieldValue = dataElement.Value.ToString(),
                     StartDate = startDate,
-                    EndDate = endDate
+                    EndDate = endDate,
+                    IsDeleted = false
                 });
             }
 
@@ -175,8 +172,8 @@ namespace WriteApi
             foreach (var mutation in mutations)
             {
                 const string sql = @"
-                    INSERT INTO dbo.Mutations (EntityId, DataElementId, FieldValue, StartDate, EndDate)
-                        VALUES (@EntityId, @DataElementId, @FieldValue, @StartDate, @EndDate);";
+                    INSERT INTO dbo.Mutations (EntityId, DataElementId, FieldValue, StartDate, EndDate, Deleted)
+                        VALUES (@EntityId, @DataElementId, @FieldValue, @StartDate, @EndDate, @Deleted);";
 
                 var cmd = new SqlCommand(sql);
                 AddCommandParameter(cmd, "@EntityId", mutation.EntityId, SqlDbType.Int);
@@ -184,6 +181,7 @@ namespace WriteApi
                 AddCommandParameter(cmd, "@FieldValue", mutation.FieldValue, SqlDbType.VarChar);
                 AddCommandParameter(cmd, "@StartDate", mutation.StartDate, SqlDbType.DateTime);
                 AddCommandParameter(cmd, "@EndDate", mutation.EndDate, SqlDbType.DateTime);
+                AddCommandParameter(cmd, "@Deleted", mutation.IsDeleted, SqlDbType.Bit);
                 cmd.Connection = connection;
 
                 await cmd.ExecuteNonQueryAsync();

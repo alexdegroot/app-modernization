@@ -70,10 +70,9 @@ namespace WriteApi
                 return;
             }
 
-            var id = await employeeRepository.Add(employee);
+            await employeeRepository.Add(employee);
 
             context.Response.StatusCode = StatusCodes.Status201Created;
-            await context.Response.WriteAsJsonAsync(new {Id = id});
         }
     }
 }
