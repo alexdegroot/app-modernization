@@ -14,8 +14,8 @@ namespace MutationProcessor.Queue
 {
     public class QueueReader : IQueueReader
     {
-        private ILogger<QueueReader> _logger;
-        private ContainerQueueClient _client;
+        private readonly ILogger<QueueReader> _logger;
+        private readonly ContainerQueueClient _client;
 
         public QueueReader(IOptions<Configuration> config, ILogger<QueueReader> logger)
         {
@@ -25,25 +25,32 @@ namespace MutationProcessor.Queue
             _client = new ContainerQueueClient(connectionString, queueName);
         }
 
+        /// <summary>
+        /// Makes sure that a Azure storage queue exists. If it doesn't exist, it will be created.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<bool> Ensure(CancellationToken cancellationToken)
         {
             try
             {
+                _logger.LogInformation("Making sure that queue exists...");
                 var result = await _client.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
                 if (result == null || result.Status == 201 || result.Status == 204)
                 {
                     return true;
                 }
             }
-            catch (RequestFailedException e)
+            catch (RequestFailedException ex)
             {
-                _logger.LogError("Couldn't connect to queue.", e);
+                _logger.LogError(ex, "Cannot connect to queue.");
             }
             return false;
         }
 
         public async IAsyncEnumerable<Message> GetChanges([EnumeratorCancellation] CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Getting changes from queue...");
             var messages = await GetMessages(cancellationToken);
             
             foreach (var message in messages)
@@ -55,9 +62,9 @@ namespace MutationProcessor.Queue
                     change = JsonSerializer.Deserialize<Change>(messageText);
                     
                 }
-                catch (JsonException e)
+                catch (JsonException ex)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(ex.Message);
                     continue;
                 }
                 yield return new Message(message.MessageId, message.PopReceipt, change);
@@ -71,9 +78,9 @@ namespace MutationProcessor.Queue
                 var response = await _client.ReceiveMessagesAsync(10, cancellationToken: cancellationToken);
                 return response.Value;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError("Couldn't receive messages from the queue", e);
+                _logger.LogError(ex, "Unable to receive messages from the queue.");
             }
 
             return Enumerable.Empty<QueueMessage>();

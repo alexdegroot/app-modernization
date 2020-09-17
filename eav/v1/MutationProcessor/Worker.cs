@@ -23,45 +23,45 @@ namespace MutationProcessor
         {
             try
             {
-                if(!await _reader.Ensure(stoppingToken))
+                if (!await _reader.Ensure(stoppingToken))
                 {
-                    _logger.LogError("Couldn't ensure that Queue is there.");
+                    _logger.LogError("Cannot ensure that Azure storage queue exists.");
                     return;
                 }
 
                 if (!await _writer.Verify(stoppingToken))
                 {
-                    _logger.LogError("Couldn't verify database connection.");
+                    _logger.LogError("Cannot verify MongoDB database connection.");
                     return;
                 }
-                
+
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    var messages = _reader.GetChanges(stoppingToken).ConfigureAwait(false);
+                    var messages = _reader.GetChanges(stoppingToken);
 
                     await foreach (var message in messages.WithCancellation(stoppingToken))
                     {
                         var change = message.Change;
                         _logger.LogInformation("a1. Process Mutation with Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
-                        if (await _writer.Append(change, stoppingToken).ConfigureAwait(false))
+                        if (await _writer.Append(change, stoppingToken))
                         {
                             _logger.LogInformation("a2. Successful processed Entity ID: {entityId}; MutationId: {mutationId}",
                                 change.EntityId, change.MutationId);
-                            await _reader.DeleteMessage(message, stoppingToken).ConfigureAwait(false);
+                            await _reader.DeleteMessage(message, stoppingToken);
                         }
                         else
                         {
-                            _logger.LogWarning("a2. Couldn't process Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
+                            _logger.LogWarning("a2. Cannot process Entity ID: {entityId}; MutationId: {mutationId}", change.EntityId, change.MutationId);
                         }
                     }
 
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                    await Task.Delay(100, stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(100, stoppingToken);
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 throw;
             }
         }

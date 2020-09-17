@@ -23,9 +23,10 @@ namespace MutationProcessor.Database
         {
             try
             {
+                _logger.LogInformation("Verifying existence of MongoDB...");
                 var dbs = await _client.ListDatabaseNamesAsync(cancellationToken);
                 
-                // Every db server at least has a few system databases
+                // Every db server at least has a few system databases.
                 if (await dbs.AnyAsync(cancellationToken))
                 {
                     return true;
@@ -33,7 +34,7 @@ namespace MutationProcessor.Database
             }
             catch (MongoException ex)
             {
-                _logger.LogError("Couldn't connect to MongoDB", ex);
+                _logger.LogError(ex, "Cannot connect to MongoDB.");
             }
 
             return false;
