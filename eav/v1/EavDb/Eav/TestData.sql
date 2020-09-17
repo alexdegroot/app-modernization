@@ -25,6 +25,8 @@ VALUES
     (524, 'Last Name'),
     (24, 'Last Name At Birth'),
     (26, 'Last Name At Birth Prefix'),
+    (44, 'Customer Name'),
+    (45, 'Company Name'),
     (51, 'First Names'),
     (165, 'First Name To Use'),
     (146, 'Formatted Name'),
@@ -63,7 +65,7 @@ GO
 -- Insert a country, test clients (template 15) and some companies below them (template 17).
 INSERT INTO dbo.Entities
 (
-    Id, ParentId, Code, Description, TemplateId, TenantId, Deleted
+    Id, ParentId, Code, Description, TemplateId, TenantId
 )
 VALUES
     (10000001, 0, 'NL', 'Nederland', 12, 0),
@@ -87,7 +89,16 @@ INSERT INTO dbo.Mutations
     EntityId, DataElementId, FieldValue, StartDate, EndDate, Deleted
 )
 VALUES
-(
-    10000001, 10, 'NL', '2001-01-01', '9999-12-31', 0
-)
+    (10000001, 10, 'NL', '2001-01-01', '9999-12-31', 0),
+    (10029872, 44, 'Metatech Nederland', '2001-01-01', '9999-12-31', 0),
+    (10496315, 44, 'Volvo Nederland N.V.', '2001-01-01', '9999-12-31', 0),
+    (10618376, 44, 'Vodafone Libertel', '2001-01-01', '9999-12-31', 0),
+    (10028636, 45, 'Metatech Administratie B.V.', '2001-01-01', '9999-12-31', 0),
+    (10028637, 45, 'Metatech Constructie', '2001-01-01', '9999-12-31', 0),
+    (10028504, 45, 'Metatech Horeca Services', '2001-01-01', '9999-12-31', 0),
+    (10183634, 45, 'Metatech Wonen', '2001-01-01', '9999-12-31', 0),
+    (10496382, 45, 'Volvo Nederland B.V.', '2001-01-01', '9999-12-31', 0),
+    (10496389, 45, 'VFS Financial Services B.V.', '2001-01-01', '9999-12-31', 0),
+    (10496410, 45, 'Volvo Truck Center B.V.', '2001-01-01', '9999-12-31', 0),
+    (10619998, 45, 'Vodafone Libertel B.V.', '2001-01-01', '9999-12-31', 0)
 GO
