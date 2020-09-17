@@ -58,8 +58,10 @@ VALUES
     (393, 'Street Number Additional'),
     (394, 'Postal Code'),
     (395, 'City'),
-    (34,  'Country')
-
+    (34,  'Country'),
+    -- Contract elements
+    (90, 'Contract Description'),
+    (91, 'Contract Code')
 GO
 
 -- Insert a country, test clients (template 15) and some companies below them (template 17).
@@ -80,10 +82,21 @@ VALUES
     (10496389, 10496315, 'HH48', 'VFS Financial Services B.V.', 17, 10496315),
     (10496410, 10496315, 'HH55', 'Volvo Truck Center B.V.', 17, 10496315),
     (10619998, 10618376, 'VL99', 'Vodafone Libertel B.V.', 17, 10618376)
-    
 GO
 
--- Insert initial Language value on country level.
+-- Insert some test employees (template 21) and contracts (template 49).
+INSERT INTO dbo.Entities
+(
+    Id, ParentId, Code, Description, TemplateId, TenantId
+)
+VALUES
+    (10503058, 10028636, '99020', 'Janssen, J.P.', 21, 10029872),
+    (10503060, 10028636, '98310', 'Bloemendaal, B.', 21, 10029872),
+    (10512861, 10503058, '98310', 'Basiscontract', 49, 10029872),
+    (10512862, 10503060, '99020', 'Basiscontract', 49, 10029872)
+GO
+
+-- Insert a (default) language value on country level and client and company name values.
 INSERT INTO dbo.Mutations
 (
     EntityId, DataElementId, FieldValue, StartDate, EndDate, Deleted
@@ -101,4 +114,19 @@ VALUES
     (10496389, 45, 'VFS Financial Services B.V.', '2001-01-01', '9999-12-31', 0),
     (10496410, 45, 'Volvo Truck Center B.V.', '2001-01-01', '9999-12-31', 0),
     (10619998, 45, 'Vodafone Libertel B.V.', '2001-01-01', '9999-12-31', 0)
+GO
+
+-- Insert employee and contract values.
+INSERT INTO dbo.Mutations
+(
+    EntityId, DataElementId, FieldValue, StartDate, EndDate, Deleted
+)
+VALUES
+    (10000001, 10, 'NL', '2001-01-01', '9999-12-31', 0),
+    (10503058, 22, N'99020', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
+    (10503060, 22, N'98310', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
+    (10512861, 90, N'001', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
+    (10512862, 90, N'001', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
+    (10512861, 91, N'Basiscontract', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
+    (10512862, 91, N'Basiscontract', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0)
 GO
