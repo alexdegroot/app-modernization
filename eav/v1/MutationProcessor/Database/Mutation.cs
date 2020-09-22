@@ -9,14 +9,19 @@ namespace MutationProcessor.Database
     {
         [BsonElement]
         public int MutationId { get; }
+
         [BsonElement]
         public DateTime? StartDate { get; }
+
         [BsonElement]
         public DateTime? EndDate { get; }
+
         [BsonElement]
         public int FieldId { get; }
+
         [BsonElement]
         public object Value { get; }
+
         [BsonElement]
         public bool IsDeleted { get; }
 
