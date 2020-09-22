@@ -90,10 +90,11 @@ INSERT INTO dbo.Entities
     Id, ParentId, Code, Description, TemplateId, TenantId
 )
 VALUES
-    (10503058, 10028636, '99020', 'Janssen, J.P.', 21, 10029872),
-    (10503060, 10028636, '98310', 'Bloemendaal, B.', 21, 10029872),
     (10512861, 10503058, '98310', 'Basiscontract', 49, 10029872),
-    (10512862, 10503060, '99020', 'Basiscontract', 49, 10029872)
+    (10512862, 10503060, '99020', 'Basiscontract', 49, 10029872),
+    (10503058, 10028636, '99020', 'Janssen, J.P.', 21, 10029872),
+    (10503060, 10028636, '98310', 'Bloemendaal, B.', 21, 10029872)
+
 GO
 
 -- Insert a (default) language value on country level and client and company name values.
