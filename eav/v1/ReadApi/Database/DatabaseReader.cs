@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -99,19 +100,72 @@ namespace ReadApi.Database
 
             var entityCollection = GetEntityCollection(tenantCode);
 
-            // Create and apply a filter to select an entity with the specified parent entity ID from the collection.
-            var entityFilter = Builders<Entity>.Filter;
-            var entities = await entityCollection.Find(
-                entityFilter.And(
-                    entityFilter.Eq(x => x.ParentId, parentEntityId),
-                    entityFilter.Eq(x => x.TemplateId, templateId),
-                    entityFilter.Eq(x => x.IsDeleted, false),
-                    // TODO: The filter below does not work yet, deleted mutations are still returned.
-                    entityFilter.ElemMatch(e => e.Mutations,
-                        Builders<Mutation>.Filter.Eq(m => m.IsDeleted, false))
-                )
-            )
-            .ToListAsync();
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var dtNow = DateTime.Now.Date;
+            var aggregate = entityCollection.Aggregate()
+                .Match(e => e.ParentId == parentEntityId)
+                .Match(e => e.TemplateId == templateId)
+                .Match(e => !e.IsDeleted)
+                .Project<Entity>(new BsonDocument
+                    {
+                        {
+                            "Mutations", new BsonDocument
+                            {
+                                {
+                                    "$filter", new BsonDocument
+                                    {
+                                        {"input", "$Mutations"},
+                                        {"as", "mutation"},
+                                        {
+                                            "cond", new BsonDocument
+                                            {
+                                                {
+                                                    "$and", new BsonArray
+                                                    {
+                                                        new BsonDocument
+                                                        {
+                                                            {
+                                                                "$eq", new BsonArray
+                                                                {
+                                                                    "$$mutation.IsDeleted", false
+                                                                }
+                                                            }
+                                                        },
+                                                        new BsonDocument
+                                                        {
+                                                            {
+                                                                "$gte", new BsonArray
+                                                                {
+                                                                    dtNow, "$$mutation.StartDate"
+                                                                }
+                                                            }
+                                                        },
+                                                        new BsonDocument
+                                                        {
+                                                            {
+                                                                "$lte", new BsonArray
+                                                                {
+                                                                    dtNow, "$$mutation.EndDate"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+
+            var entities = await aggregate.ToListAsync();
+
+            stopwatch.Stop();
+            _logger.LogInformation($"Executed MongoDB query in {stopwatch.ElapsedMilliseconds} milliseconds.");
 
             return entities;
         }
