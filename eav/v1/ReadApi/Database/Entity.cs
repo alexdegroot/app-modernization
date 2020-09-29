@@ -20,5 +20,8 @@ namespace ReadApi.Database
 
         [BsonElement]
         public Mutation[] Mutations { get; set; }
+
+        [BsonElement]
+        public Entity[] ChildEntities { get; set; }
     }
 }
