@@ -33,57 +33,18 @@ namespace ReadApi.Database
 
             var dtNow = DateTime.Now.Date;
             var entity = await entityCollection.Aggregate()
-                .Match(e => e.Id == entityId && !e.IsDeleted)
+                .Match(new BsonDocument
+                {
+                    { "_id", entityId },
+                    { "IsDeleted", false }
+                })
                 .Project<Entity>(new BsonDocument
                     {
+                        { "ParentId", 1 },
+                        { "TemplateId", 1 },
+                        { "Mutations", BsonQuery.CreateMutationsFilter(dtNow) },
                         {
-                            "Mutations", new BsonDocument
-                            {
-                                {
-                                    "$filter", new BsonDocument
-                                    {
-                                        {"input", "$Mutations"},
-                                        {"as", "mutation"},
-                                        {
-                                            "cond", new BsonDocument
-                                            {
-                                                {
-                                                    "$and", new BsonArray
-                                                    {
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$eq", new BsonArray
-                                                                {
-                                                                    "$$mutation.IsDeleted", false
-                                                                }
-                                                            }
-                                                        },
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$gte", new BsonArray
-                                                                {
-                                                                    dtNow, "$$mutation.StartDate"
-                                                                }
-                                                            }
-                                                        },
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$lte", new BsonArray
-                                                                {
-                                                                    dtNow, "$$mutation.EndDate"
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            "ChildEntities", BsonQuery.CreateChildEntitiesMapper(dtNow, true)
                         }
                     }
                 ).SingleOrDefaultAsync();
@@ -105,59 +66,19 @@ namespace ReadApi.Database
 
             var dtNow = DateTime.Now.Date;
             var aggregate = entityCollection.Aggregate()
-                .Match(e => e.ParentId == parentEntityId)
-                .Match(e => e.TemplateId == templateId)
-                .Match(e => !e.IsDeleted)
+                .Match(new BsonDocument
+                {
+                    { "ParentId", parentEntityId },
+                    { "TemplateId",  templateId},
+                    { "IsDeleted", false }
+                })
                 .Project<Entity>(new BsonDocument
                     {
+                        { "ParentId", 1 },
+                        { "TemplateId", 1 },
+                        { "Mutations", BsonQuery.CreateMutationsFilter(dtNow) },
                         {
-                            "Mutations", new BsonDocument
-                            {
-                                {
-                                    "$filter", new BsonDocument
-                                    {
-                                        {"input", "$Mutations"},
-                                        {"as", "mutation"},
-                                        {
-                                            "cond", new BsonDocument
-                                            {
-                                                {
-                                                    "$and", new BsonArray
-                                                    {
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$eq", new BsonArray
-                                                                {
-                                                                    "$$mutation.IsDeleted", false
-                                                                }
-                                                            }
-                                                        },
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$gte", new BsonArray
-                                                                {
-                                                                    dtNow, "$$mutation.StartDate"
-                                                                }
-                                                            }
-                                                        },
-                                                        new BsonDocument
-                                                        {
-                                                            {
-                                                                "$lte", new BsonArray
-                                                                {
-                                                                    dtNow, "$$mutation.EndDate"
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            "ChildEntities", BsonQuery.CreateChildEntitiesMapper(dtNow, true)
                         }
                     }
                 );
