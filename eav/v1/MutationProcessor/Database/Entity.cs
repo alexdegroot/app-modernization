@@ -1,10 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
+using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace MutationProcessor.Database
 {
-    [SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty")]
     internal class Entity
     {
         public Entity(Change change)
@@ -12,6 +11,8 @@ namespace MutationProcessor.Database
             Id = change.EntityId;
             ParentId = change.EntityParentId;
             TemplateId = change.EntityTemplateId;
+            StartDate = change.EntityStartDate;
+            EndDate = change.EntityEndDate;
             IsDeleted = change.EntityDeleted;
         }
 
@@ -24,6 +25,12 @@ namespace MutationProcessor.Database
 
         [BsonElement]
         public int TemplateId { get; set; }
+
+        [BsonElement]
+        public DateTime StartDate { get; set; }
+
+        [BsonElement]
+        public DateTime EndDate { get; set; }
 
         [BsonElement]
         public bool IsDeleted { get; set; }

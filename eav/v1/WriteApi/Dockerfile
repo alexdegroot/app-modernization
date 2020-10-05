@@ -1,7 +1,7 @@
 ARG Project=WriteApi
 
 # Get smallest SDK image
-FROM mcr.microsoft.com/dotnet/core/sdk:5.0-alpine AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build-env
 WORKDIR /app
 
 # Create project to look for

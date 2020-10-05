@@ -41,6 +41,8 @@ CREATE TABLE dbo.Entities
     Description VARCHAR(100),
     TemplateId INT FOREIGN KEY REFERENCES Templates(ID),
     TenantId INT NOT NULL,
+    StartDate DATETIME NOT NULL,
+    EndDate DATETIME NOT NULL,
     Deleted BIT
 )
 
@@ -67,6 +69,7 @@ CREATE TABLE dbo.Mutations
     EntityId INT FOREIGN KEY REFERENCES Entities(ID),
     DataElementId INT FOREIGN KEY REFERENCES DataElements(ID),
     FieldValue VARCHAR(100),
+    MutationDateTime DATETIME,
     StartDate DATETIME NOT NULL,
     EndDate DATETIME NOT NULL,
     Deleted BIT NOT NULL

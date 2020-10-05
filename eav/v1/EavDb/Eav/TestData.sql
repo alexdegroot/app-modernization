@@ -1,6 +1,7 @@
-PRINT 'Inserting test clients, companies and data elements...'
 
--- Insert entity types.
+-- Insert entity types and define a basic set of data elements.
+PRINT 'Inserting templates and data elements...'
+
 INSERT INTO dbo.Templates
 (
     Id, Name
@@ -13,7 +14,6 @@ VALUES
     (49, 'Contract')
 GO
 
--- Define a basic set of data elements.
 INSERT INTO dbo.DataElements
 (
     Id, Description
@@ -65,35 +65,39 @@ VALUES
 GO
 
 -- Insert a country, test clients (template 15) and some companies below them (template 17).
+PRINT 'Inserting test clients and companies...'
+
 INSERT INTO dbo.Entities
 (
-    Id, ParentId, Code, Description, TemplateId, TenantId
+    Id, ParentId, Code, Description, TemplateId, TenantId, StartDate, EndDate
 )
 VALUES
-    (10000001, 0, 'NL', 'Nederland', 12, 0),
-    (10029872, 10000001, '4024898', 'Metatech Nederland', 15, 10029872),
-    (10496315, 10000001, '5031084', 'Volvo Nederland N.V.', 15, 10496315),
-    (10618376, 10000001, '4000306', 'Vodafone Libertel', 15, 10618376),
-    (10028636, 10029872, '030', 'Metatech Administratie B.V.', 17, 10029872),
-    (10028637, 10029872, '800', 'Metatech Constructie', 17, 10029872),
-    (10028504, 10029872, '020', 'Metatech Horeca Services', 17, 10029872),
-    (10183634, 10029872, '040', 'Metatech Wonen', 17, 10029872),
-    (10496382, 10496315, 'DD41', 'Volvo Nederland B.V.', 17, 10496315),
-    (10496389, 10496315, 'HH48', 'VFS Financial Services B.V.', 17, 10496315),
-    (10496410, 10496315, 'HH55', 'Volvo Truck Center B.V.', 17, 10496315),
-    (10619998, 10618376, 'VL99', 'Vodafone Libertel B.V.', 17, 10618376)
+    (10000001, 0, 'NL', 'Nederland', 12, 0, '2001-01-01', '9999-12-31'),
+    (10029872, 10000001, '4024898', 'Metatech Nederland', 15, 10029872, '2001-01-01', '9999-12-31'),
+    (10496315, 10000001, '5031084', 'Volvo Nederland N.V.', 15, 10496315, '2001-01-01', '9999-12-31'),
+    (10618376, 10000001, '4000306', 'Vodafone Libertel', 15, 10618376, '2001-01-01', '9999-12-31'),
+    (10028636, 10029872, '030', 'Metatech Administratie B.V.', 17, 10029872, '2001-01-01', '9999-12-31'),
+    (10028637, 10029872, '800', 'Metatech Constructie', 17, 10029872, '2001-01-01', '9999-12-31'),
+    (10028504, 10029872, '020', 'Metatech Horeca Services', 17, 10029872, '2001-01-01', '9999-12-31'),
+    (10183634, 10029872, '040', 'Metatech Wonen', 17, 10029872, '2001-01-01', '9999-12-31'),
+    (10496382, 10496315, 'DD41', 'Volvo Nederland B.V.', 17, 10496315, '2001-01-01', '9999-12-31'),
+    (10496389, 10496315, 'HH48', 'VFS Financial Services B.V.', 17, 10496315, '2001-01-01', '9999-12-31'),
+    (10496410, 10496315, 'HH55', 'Volvo Truck Center B.V.', 17, 10496315, '2001-01-01', '9999-12-31'),
+    (10619998, 10618376, 'VL99', 'Vodafone Libertel B.V.', 17, 10618376, '2001-01-01', '9999-12-31')
 GO
 
 -- Insert some test employees (template 21) and contracts (template 49).
+PRINT 'Inserting test employees and contracts...'
+
 INSERT INTO dbo.Entities
 (
-    Id, ParentId, Code, Description, TemplateId, TenantId
+    Id, ParentId, Code, Description, TemplateId, TenantId, StartDate, EndDate
 )
 VALUES
-    (10512861, 10503058, '98310', 'Basiscontract', 49, 10029872),
-    (10512862, 10503060, '99020', 'Basiscontract', 49, 10029872),
-    (10503058, 10028636, '99020', 'Janssen, J.P.', 21, 10029872),
-    (10503060, 10028636, '98310', 'Bloemendaal, B.', 21, 10029872)
+    (10512861, 10503058, '98310', 'Basiscontract', 49, 10029872, '2019-01-01', '9999-12-31'),
+    (10512862, 10503060, '99020', 'Basiscontract', 49, 10029872, '2019-01-01', '9999-12-31'),
+    (10503058, 10028636, '99020', 'Janssen, J.P.', 21, 10029872, '2019-01-01', '9999-12-31'),
+    (10503060, 10028636, '98310', 'Bloemendaal, B.', 21, 10029872, '2019-01-01', '9999-12-31')
 
 GO
 
@@ -123,11 +127,10 @@ INSERT INTO dbo.Mutations
     EntityId, DataElementId, FieldValue, StartDate, EndDate, Deleted
 )
 VALUES
-    (10000001, 10, 'NL', '2001-01-01', '9999-12-31', 0),
-    (10503058, 22, N'99020', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
-    (10503060, 22, N'98310', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
-    (10512861, 90, N'001', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
-    (10512862, 90, N'001', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
-    (10512861, 91, N'Basiscontract', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0),
-    (10512862, 91, N'Basiscontract', CAST(N'2002-01-01T00:00:00.000' AS DateTime), CAST(N'9999-12-31T00:00:00.000' AS DateTime), 0)
+    (10503058, 22, N'99020', '2002-01-01', '9999-12-31', 0),
+    (10503060, 22, N'98310', '2002-01-01', '9999-12-31', 0),
+    (10512861, 90, N'001', '2002-01-01', '9999-12-31', 0),
+    (10512862, 90, N'001', '2002-01-01', '9999-12-31', 0),
+    (10512861, 91, N'Basiscontract', '2002-01-01', '9999-12-31', 0),
+    (10512862, 91, N'Basiscontract', '2002-01-01', '9999-12-31', 0)
 GO
