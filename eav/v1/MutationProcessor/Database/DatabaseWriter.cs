@@ -119,6 +119,8 @@ namespace MutationProcessor.Database
                 Builders<Entity>.Update.SetOnInsert(x => x.Id, change.EntityId),
                 Builders<Entity>.Update.Set(x => x.ParentId, change.EntityParentId),
                 Builders<Entity>.Update.Set(x => x.TemplateId, change.EntityTemplateId),
+                Builders<Entity>.Update.Set(x => x.StartDate, change.EntityStartDate),
+                Builders<Entity>.Update.Set(x => x.EndDate, change.EntityEndDate),
                 Builders<Entity>.Update.Set(x => x.IsDeleted, change.EntityDeleted)
             );
             return await collection.UpdateOneAsync(entityFilter, fullInsert, upsert, cancellationToken);

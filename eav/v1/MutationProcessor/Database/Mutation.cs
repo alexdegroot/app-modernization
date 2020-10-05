@@ -11,10 +11,13 @@ namespace MutationProcessor.Database
         public int MutationId { get; }
 
         [BsonElement]
-        public DateTime? StartDate { get; }
+        public DateTime MutationDateTime { get; set; }
 
         [BsonElement]
-        public DateTime? EndDate { get; }
+        public DateTime StartDate { get; }
+
+        [BsonElement]
+        public DateTime EndDate { get; }
 
         [BsonElement]
         public int FieldId { get; }
@@ -28,6 +31,7 @@ namespace MutationProcessor.Database
         public Mutation(Change change)
         {
             MutationId = change.MutationId;
+            MutationDateTime = change.MutationDateTime;
             StartDate = change.MutationStartDate;
             EndDate = change.MutationEndDate;
             IsDeleted = change.MutationDeleted;
