@@ -86,6 +86,7 @@ namespace ReadApi.Database
                         {
                             "in", new BsonDocument
                             {
+                                {  "TemplateId", "$$entity.TemplateId" },
                                 {
                                     "Mutations", BsonQuery.CreateMutationsFilter(referenceDate, "$$entity.Mutations",
                                         filterOnParentDeletedStatus)

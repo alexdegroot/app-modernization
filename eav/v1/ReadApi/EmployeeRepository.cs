@@ -77,20 +77,39 @@ namespace ReadApi
 
             foreach (var entity in entities)
             {
-                var employee = new Employee();
-                employees.Add(employee);
-
-                foreach (var mutation in entity.Mutations)
+                var employee = new Employee
                 {
-                    _entityMapper.MapToEntity(employee, new DataElementRow(
-                        mutation.FieldId,
-                        // TODO: Take data element types into account.
-                        mutation.Value != null ? mutation.Value.ToString() : string.Empty,
-                        DataElementDataType.Undefined));
-                }
+                    Id = entity.Id,
+                    CompanyId = entity.ParentId
+                };
+                employees.Add(employee);
+                MapToEmployee(entity, employee);
             }
 
             return employees;
+        }
+
+        private void MapToEmployee(Entity entity, Employee employee)
+        {
+            foreach (var mutation in entity.Mutations)
+            {
+                _entityMapper.MapToEntity(employee, new DataElementRow(
+                    mutation.FieldId,
+                    // TODO: Take data element types into account.
+                    mutation.Value != null ? mutation.Value.ToString() : string.Empty,
+                    DataElementDataType.Undefined));
+            }
+
+            if (entity.ChildEntities != null)
+            {
+                foreach (var childEntity in entity.ChildEntities)
+                {
+                    if (childEntity.TemplateId == (int)EntityType.Contract)
+                    {
+                        MapToEmployee(childEntity, employee);
+                    }
+                }
+            }
         }
     }
 }
