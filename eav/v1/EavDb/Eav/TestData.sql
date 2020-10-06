@@ -60,8 +60,21 @@ VALUES
     (395, 'City'),
     (34,  'Country'),
     -- Contract elements
+    (53, 'Cost Allocation'),
+    (65, 'Schedule'),
+    (67, 'Processing Unit'),
+    (75, 'Location'),
     (90, 'Contract Description'),
-    (91, 'Contract Code')
+    (91, 'Contract Code'),
+    (96, 'Department'),
+    (97, 'Job Profile'),
+    (101, 'Employment Benefits Cluster'),
+    (193, 'Company CLA'),
+    (463, 'Work Period'),
+    (464, 'Days Period'),
+    (465, 'Hours Period'),
+    (474, 'Classification Indicator'),
+    (477, 'Working Days')
 GO
 
 -- Insert a country, test clients (template 15) and some companies below them (template 17).

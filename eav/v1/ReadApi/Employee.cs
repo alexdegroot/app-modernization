@@ -1,12 +1,13 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace ReadApi
 {
     public class Employee
     {
-        public int Id { get; set; }
+        private Employment _employment;
 
-        public int TenantId { get; set; }
+        public int Id { get; set; }
 
         public int CompanyId { get; set; }
 
@@ -46,11 +47,7 @@ namespace ReadApi
 
         public string MaritalStatus { get; set; }
 
-        public DateTime? EndDateEmployment { get; set; }
-
         public string SortName { get; set; }
-
-        public DateTime? DischargeDate { get; set; }
 
         public string Nationality { get; set; }
 
@@ -79,5 +76,61 @@ namespace ReadApi
         public string HomeAddressCity { get; set; }
 
         public string HomeAddressCountry { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentContractId { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentContractDescription { get; set; }
+
+        [JsonIgnore]
+        public DateTime EmploymentHireDate { get; set; }
+
+        [JsonIgnore]
+        public DateTime EmploymentFirstHireDate { get; set; }
+
+        [JsonIgnore]
+        public DateTime EmploymentDischargeDate { get; set; }
+
+        [JsonIgnore]
+        public DateTime EndDateEmployment { get; set; }        
+
+        [JsonIgnore]
+        public string EmploymentType { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentClassification { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentCostCenter { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentContractType { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentLocation { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentCompanyCla { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentWorkPeriod { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentDaysPeriod { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentHoursPeriod { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentJobProfile { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentBenefitsCluster { get; set; }
+
+        [JsonIgnore]
+        public string EmploymentDepartment { get; set; }
+
+        public Employment Employment => _employment ?? (_employment = new Employment(this));
     }
 }
